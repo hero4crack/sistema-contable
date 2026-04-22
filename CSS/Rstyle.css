@@ -1,0 +1,117 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+small{
+    display: none; 
+    
+}
+body{
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background: linear-gradient(130deg,skyblue, blue);
+}
+
+.container{
+    max-width: 700px;
+    width: 100%;
+    padding: 25px 30px;
+    background-color: aliceblue;
+    border-radius: 5px;
+}
+.container .title{
+    font-size: 25;
+    font-weight: 500;
+
+}
+/*
+.container form{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 10px 12px 0;
+}
+*/
+form .form-group{
+    margin-bottom: 15px;
+    width: calc(100%/2-20px);
+}
+
+form span{
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.form-group input{
+    height: 40px;
+    width: 100%;
+    outline: none;
+    border-radius: 5px;
+    border: 1px solid cornsilk;
+    padding-left: 15px;
+    border-bottom: width 2px;
+    transition: all 0,3 ease;
+}
+
+.form-group input:focus,
+.form-group input:valid{
+    border-color: skyblue;
+}
+
+form .button{
+    width: 100%;
+    height: 40px;
+    margin: 40px 0;
+}
+
+form .button input {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    cursor: pointer;
+    background: linear-gradient(130deg, blue, skyblue );
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 5px;
+}
+form .button input:hover{
+    background: linear-gradient(130deg, skyblue, blue);
+}
+
+.was-validated small{
+    display: block;
+    color: red;
+}
+
+@media(max-width: 584px){
+    .container{
+        max-width: 100%;
+    }
+
+form .form-group{
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.container form{
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
+
+.container form::-webkit-scrollbar{
+    width: 0;
+}
+
+form .button{
+    margin: 20px 0;
+}
+}
