@@ -6,8 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Entidades | Contable EA</title>
-    <link rel="stylesheet" href="../CSS/bootstrap.min.css">
-    <link rel="stylesheet" href="../CSS/style_cliente.css">
+        <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 </head>
@@ -28,28 +27,14 @@
         </aside>
 
         <main class="viewport">
-            <header class="navbar">
-                <div class="nav-title">GESTIÓN DE ENTIDADES CLIENTES</div>
-                    <div class="user-menu-container" id="userMenu">
-                    <div class="user-info">
-                        <span class="user-name">Administrador</span> <div class="user-avatar">EA</div>
-                        <i class="fas fa-chevron-down caret"></i>
-                    </div>
-                    
-                    <div class="dropdown-menu">
-                        <a href="#"><i class="fas fa-user-cog"></i> Mi Perfil</a>
-                        <a href="#"><i class="fas fa-key"></i> Cambiar Contraseña</a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="logout-link"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
-                    </div>
-                </div>
-            </header>
+
+            <?php include_once('header.php'); ?>
 
             <section class="content">
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; padding: 20px; border-bottom: 1px solid #e2e8f0;">
                         <input type="text" placeholder="Buscar empresa..." style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; width: 300px;">
-                        <button class="bg-primary primary-btn fw-normal p-2 h-25" >
+                        <button class="bg-primary primary-btn fw-normal p-2 h-25">
                             <i class="fas fa-plus"></i> AGREGAR CLIENTE
                         </button>
                     </div>
@@ -98,10 +83,10 @@
                                             if ($row['estado_activo'] == 1) {
 
                                                 echo "<td class='fw-bold'> activo </td>";
-                                            } else{
+                                            } else {
 
                                                 echo "<td> En proceso </td>";
-                                            } 
+                                            }
                                             ?>
                                             <td>
                                                 <button class="config-btn"><i class="fas fa-sliders-h"></i></button>
@@ -118,7 +103,7 @@
             </section>
         </main>
     </div>
-        <script>
+    <script>
         document.getElementById('userMenu').addEventListener('click', function(e) {
             // Previene que se cierre si haces clic dentro del menú
             e.stopPropagation();
