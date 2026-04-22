@@ -17,10 +17,11 @@
         <aside class="main-sidebar">
             <div class="brand"><i class="fas fa-calculator"></i> CONTABLE EA</div>
             <nav class="menu">
-                <a href="#"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="#"><i class="fas fa-chart-line"></i>Inicio</a>
                 <a href="#" class="active"><i class="fas fa-city"></i> Empresas Clientes</a>
                 <a href="#"><i class="fas fa-file-invoice"></i> Libro de Facturas</a>
                 <a href="#"><i class="fas fa-book"></i> Asientos Diario</a>
+                <a href="../VIEWS/empleados.php" class="active"><i class="fas fa-users"></i> Empleados</a>
                 <a href="#"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
                 <a href="#"><i class="fas fa-shield-alt"></i> Auditoría</a>
             </nav>
