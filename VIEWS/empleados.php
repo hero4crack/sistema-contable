@@ -43,7 +43,7 @@
                                     <th>Empresa (ID)</th>
                                     <th>Cédula</th>
                                     <th>Nombre Completo</th>
-                                    <th>Acciones</th>
+                                    <th>Número de Telefono</th>
                                 </tr>
                             </thead>
                             <tbody>
