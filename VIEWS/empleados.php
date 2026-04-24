@@ -20,9 +20,10 @@
             <nav class="menu">
                 <a href="../VIEWS/inicio.php"><i class="fas fa-chart-line"></i>Inicio</a>
                 <a href="../VIEWS/empresas_clientes.php"><i class="fas fa-city"></i> Empresas Clientes</a>
-                <a href="#"><i class="fas fa-city"></i>Libro de Facturas</a>
-                <a href="../VIEWS/empleados.php" class="active"><i class="fas fa-users"></i> Empleados</a>
+                <a href="../VIEWS/libro_facturas.php"><i class="fas fa-city"></i>Libro de Facturas</a>
+               
                 <a href=""><i class="fas fa-book"></i> Asientos Diario</a>
+                 <a href="../VIEWS/empleados.php" class="active"><i class="fas fa-users"></i> Empleados</a>
                 <a href="#"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
                 <a href="#"><i class="fas fa-shield-alt"></i> Auditoría</a>
             </nav>
@@ -62,13 +63,13 @@
 
                                                 <div class="row">
                                                     <div class="col align-self-center p-2">
-                                                        <input class="form-control" type="email" name="password_hash" id="password_hash" placeholder="Ingrese su Correo" required>
+                                                        <input class="form-control" type="password" name="password_hash" id="password_hash" placeholder="Ingrese su Correo" required>
                                                     </div>
                                                 </div>
 
                                                 <div class="row">
                                                     <div class="col align-self-center p-2">
-                                                        <input class="form-control" type="password" name="rol" id="rol" placeholder="Ingrese el Rol" required>
+                                                        <input class="form-control" type="text" name="rol" id="rol" placeholder="Ingrese el Rol" required>
 
                                                     </div>
                                                 </div>
@@ -127,8 +128,7 @@
                                             <td><?php echo htmlspecialchars($row['nombre_completo']); ?></td>
 
                                             <td>
-                                                <button class="config-btn" title="Editar"><i class="fas fa-edit"></i></button>
-                                                <button class="config-btn" title="Eliminar" style="color: #ef4444;"><i class="fas fa-trash"></i></button>
+                                                
                                             </td>
                                         </tr>
                                     <?php } ?>

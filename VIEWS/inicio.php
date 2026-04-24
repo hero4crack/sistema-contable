@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_inicio.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../JAVASCRIPT/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -23,8 +24,24 @@
         </aside>
 
         <main class="viewport">
-            <?php include_once ('header.php'); ?>
+
+
+
+            <?php include('header.php'); ?>
+
+
         </main>
     </div>
+
+    <script>
+        const userMenu = document.getElementById('userMenu');
+        userMenu.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.classList.toggle('active');
+        });
+        window.onclick = function() {
+            userMenu.classList.remove('active');
+        }
+    </script>
 </body>
 </html>
