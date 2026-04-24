@@ -1,4 +1,4 @@
-<?php include_once('../BACKEND/conecxion_login.php'); ?>
+<?php include_once('../BACKEND/conecxion_bd.php'); ?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -6,8 +6,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Entidades | Contable EA</title>
-        <link rel="stylesheet" href="../CSS/style_cliente.css">
+    <link rel="stylesheet" href="../CSS/bootstrap.min.css">
+    <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../JAVASCRIPT/bootstrap.bundle.min.js"></script>
 
 </head>
 

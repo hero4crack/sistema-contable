@@ -1,5 +1,5 @@
 <?php
-include ('conecxion_login.php');
+include ('conecxion_bd.php');
 
 
 
