@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-04-2026 a las 22:08:13
+-- Tiempo de generación: 24-04-2026 a las 07:54:43
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -46,9 +46,10 @@ CREATE TABLE `asiento_diario` (
   `nro_comprobante` varchar(20) NOT NULL,
   `tipo_comprobante` enum('ingreso','egreso','diario') NOT NULL,
   `fecha_asiento` date NOT NULL,
-  `glosa` varchar(255) NOT NULL,
+  `glosa` varchar(2000) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `id_factura` int(11) DEFAULT NULL,
+  `id_periodo` int(11) DEFAULT NULL,
   `estado_asiento` enum('borrador','posteado','anulado') DEFAULT 'borrador',
   `creado_en` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -110,8 +111,17 @@ CREATE TABLE `empleados` (
   `id_empleado` int(11) NOT NULL,
   `id_empresa` int(11) NOT NULL,
   `cedula` varchar(20) NOT NULL,
-  `nombre_completo` varchar(255) NOT NULL
+  `nombre_completo` varchar(255) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `telefono` int(12) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `empleados`
+--
+
+INSERT INTO `empleados` (`id_empleado`, `id_empresa`, `cedula`, `nombre_completo`, `id_usuario`, `telefono`) VALUES
+(1, 1, '30009775', 'hanomiya Games', 1, 426306023);
 
 -- --------------------------------------------------------
 
@@ -124,16 +134,20 @@ CREATE TABLE `empresas_clientes` (
   `nombre_empresa` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'nombre de la empresa o cliente privado',
   `rif` varchar(20) NOT NULL,
   `razon_social` varchar(255) NOT NULL,
+  `direccion_fiscal` text DEFAULT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `correo_electronico` varchar(100) DEFAULT NULL,
   `tipo_contribuyente` enum('ORDINARIO','ESPECIAL','FORMAL') NOT NULL,
-  `estado_activo` tinyint(1) DEFAULT 1
+  `estado_activo` tinyint(1) DEFAULT 1,
+  `pais` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `empresas_clientes`
 --
 
-INSERT INTO `empresas_clientes` (`id_empresa`, `nombre_empresa`, `rif`, `razon_social`, `tipo_contribuyente`, `estado_activo`) VALUES
-(1, 'fr.accesories', 'J-300097752', 'xyz', 'ORDINARIO', 1);
+INSERT INTO `empresas_clientes` (`id_empresa`, `nombre_empresa`, `rif`, `razon_social`, `direccion_fiscal`, `telefono`, `correo_electronico`, `tipo_contribuyente`, `estado_activo`, `pais`) VALUES
+(1, 'fr.accesories', 'J-300097752', 'xyz', 'mio casa', '04124707316', 'tamgamandapio@gmail.com', 'ORDINARIO', 1, 'Tangamandapio');
 
 -- --------------------------------------------------------
 
@@ -145,18 +159,36 @@ CREATE TABLE `facturas` (
   `id_factura` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `id_empresa` int(11) NOT NULL,
+  `id_periodo` int(11) DEFAULT NULL,
   `id_tercero` int(11) NOT NULL,
   `tipo_transaccion` enum('VENTA','COMPRA') NOT NULL,
   `nro_factura` varchar(50) NOT NULL,
   `nro_control` varchar(50) NOT NULL,
   `fecha_documento` date NOT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'fecha del registro',
-  `monto_exento` decimal(18,2) DEFAULT 0.00,
   `base_imponible` decimal(18,2) DEFAULT 0.00,
+  `monto_exento` decimal(18,2) DEFAULT 0.00,
   `monto_iva` decimal(18,2) DEFAULT 0.00,
+  `alicuota_iva` decimal(5,2) DEFAULT 16.00,
   `monto_igtf` decimal(18,2) DEFAULT 0.00,
   `total_factura` decimal(18,2) NOT NULL,
-  `estado_pago` enum('PAGADA','PENDIENTE','ABONADA') DEFAULT 'PENDIENTE'
+  `estado_pago` enum('PAGADA','PENDIENTE','ABONADA') DEFAULT 'PENDIENTE',
+  `tipo_documento` enum('FACTURA','NOTA_CREDITO','NOTA_DEBITO') DEFAULT 'FACTURA'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `periodo_contable`
+--
+
+CREATE TABLE `periodo_contable` (
+  `id_periodo` int(11) NOT NULL,
+  `mes` int(2) NOT NULL,
+  `anio` int(4) NOT NULL,
+  `estado` enum('Abierto','Cerrado') DEFAULT 'Abierto',
+  `fecha_cierre` timestamp NULL DEFAULT NULL,
+  `id_usuario_cierre` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -198,6 +230,13 @@ CREATE TABLE `usuarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Volcado de datos para la tabla `usuarios`
+--
+
+INSERT INTO `usuarios` (`id_usuario`, `username`, `password`, `rol`) VALUES
+(1, 'fabiannarios', '123456789', 'ADMIN');
+
+--
 -- Índices para tablas volcadas
 --
 
@@ -216,14 +255,15 @@ ALTER TABLE `asiento_diario`
   ADD PRIMARY KEY (`id_asiento`),
   ADD UNIQUE KEY `nro_comprobante` (`nro_comprobante`),
   ADD KEY `fk_usuario_asiento` (`id_usuario`),
-  ADD KEY `fk_factura_asiento` (`id_factura`);
+  ADD KEY `fk_factura_asiento` (`id_factura`),
+  ADD KEY `fk_asiento_periodo` (`id_periodo`);
 
 --
 -- Indices de la tabla `auditoria_sistema`
 --
 ALTER TABLE `auditoria_sistema`
   ADD PRIMARY KEY (`id_auditoria`),
-  ADD KEY `fk_auditoria_usuario` (`id_usuario`);
+  ADD KEY `auditoria_usuario` (`id_usuario`);
 
 --
 -- Indices de la tabla `catalogo_cuentas`
@@ -231,7 +271,7 @@ ALTER TABLE `auditoria_sistema`
 ALTER TABLE `catalogo_cuentas`
   ADD PRIMARY KEY (`id_cuenta`),
   ADD UNIQUE KEY `codigo_cuenta` (`codigo_cuenta`),
-  ADD KEY `cuenta_padre_id` (`cuenta_padre_id`);
+  ADD KEY `id_cuenta_cuenta_padre` (`cuenta_padre_id`);
 
 --
 -- Indices de la tabla `configuracion_cuentas`
@@ -248,7 +288,8 @@ ALTER TABLE `empleados`
   ADD PRIMARY KEY (`id_empleado`),
   ADD UNIQUE KEY `cedula` (`cedula`),
   ADD UNIQUE KEY `cedula_2` (`cedula`),
-  ADD KEY `fk_empleado_empresa` (`id_empresa`);
+  ADD KEY `fk_empleado_empresa` (`id_empresa`),
+  ADD KEY `id_usuario` (`id_usuario`);
 
 --
 -- Indices de la tabla `empresas_clientes`
@@ -264,7 +305,15 @@ ALTER TABLE `facturas`
   ADD PRIMARY KEY (`id_factura`),
   ADD KEY `fk_factura_empresa` (`id_empresa`),
   ADD KEY `fk_factura_tercero` (`id_tercero`),
-  ADD KEY `fk_usuario_factura` (`id_usuario`);
+  ADD KEY `fk_usuario_factura` (`id_usuario`),
+  ADD KEY `fk_factura_periodo` (`id_periodo`);
+
+--
+-- Indices de la tabla `periodo_contable`
+--
+ALTER TABLE `periodo_contable`
+  ADD PRIMARY KEY (`id_periodo`),
+  ADD KEY `fk_usuario_cierre` (`id_usuario_cierre`);
 
 --
 -- Indices de la tabla `retenciones_islr`
@@ -326,7 +375,7 @@ ALTER TABLE `configuracion_cuentas`
 -- AUTO_INCREMENT de la tabla `empleados`
 --
 ALTER TABLE `empleados`
-  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `empresas_clientes`
@@ -339,6 +388,12 @@ ALTER TABLE `empresas_clientes`
 --
 ALTER TABLE `facturas`
   MODIFY `id_factura` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `periodo_contable`
+--
+ALTER TABLE `periodo_contable`
+  MODIFY `id_periodo` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `retenciones_islr`
@@ -356,7 +411,7 @@ ALTER TABLE `retenciones_iva`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Restricciones para tablas volcadas
@@ -373,6 +428,8 @@ ALTER TABLE `asiento_detalle`
 -- Filtros para la tabla `asiento_diario`
 --
 ALTER TABLE `asiento_diario`
+  ADD CONSTRAINT `fk_ADiario_PContable` FOREIGN KEY (`id_periodo`) REFERENCES `periodo_contable` (`id_periodo`),
+  ADD CONSTRAINT `fk_asiento_periodo` FOREIGN KEY (`id_periodo`) REFERENCES `periodo_contable` (`id_periodo`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_factura_asiento` FOREIGN KEY (`id_factura`) REFERENCES `facturas` (`id_factura`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_usuario_asiento` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`);
 
@@ -380,13 +437,15 @@ ALTER TABLE `asiento_diario`
 -- Filtros para la tabla `auditoria_sistema`
 --
 ALTER TABLE `auditoria_sistema`
+  ADD CONSTRAINT `auditoria_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`),
   ADD CONSTRAINT `fk_auditoria_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`);
 
 --
 -- Filtros para la tabla `catalogo_cuentas`
 --
 ALTER TABLE `catalogo_cuentas`
-  ADD CONSTRAINT `catalogo_cuentas_ibfk_1` FOREIGN KEY (`cuenta_padre_id`) REFERENCES `catalogo_cuentas` (`id_cuenta`);
+  ADD CONSTRAINT `catalogo_cuentas_ibfk_1` FOREIGN KEY (`cuenta_padre_id`) REFERENCES `catalogo_cuentas` (`id_cuenta`),
+  ADD CONSTRAINT `id_cuenta_cuenta_padre` FOREIGN KEY (`cuenta_padre_id`) REFERENCES `catalogo_cuentas` (`id_cuenta`);
 
 --
 -- Filtros para la tabla `configuracion_cuentas`
@@ -398,14 +457,23 @@ ALTER TABLE `configuracion_cuentas`
 -- Filtros para la tabla `empleados`
 --
 ALTER TABLE `empleados`
-  ADD CONSTRAINT `fk_empleado_empresa` FOREIGN KEY (`id_empresa`) REFERENCES `empresas_clientes` (`id_empresa`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_empleado_empresa` FOREIGN KEY (`id_empresa`) REFERENCES `empresas_clientes` (`id_empresa`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_empleado_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `facturas`
 --
 ALTER TABLE `facturas`
+  ADD CONSTRAINT `fk_factura_asiento_diario` FOREIGN KEY (`id_factura`) REFERENCES `asiento_diario` (`id_factura`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_factura_empresa` FOREIGN KEY (`id_empresa`) REFERENCES `empresas_clientes` (`id_empresa`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_factura_periodo` FOREIGN KEY (`id_periodo`) REFERENCES `periodo_contable` (`id_periodo`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_usuario_factura` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `periodo_contable`
+--
+ALTER TABLE `periodo_contable`
+  ADD CONSTRAINT `fk_usuario_cierre` FOREIGN KEY (`id_usuario_cierre`) REFERENCES `usuarios` (`id_usuario`);
 
 --
 -- Filtros para la tabla `retenciones_islr`
