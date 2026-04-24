@@ -82,13 +82,17 @@
 
                                             <td><?php echo $row['razon_social']; ?></td>
 
+                                            <td><span class="tag"><?php echo $row['tipo_contribuyente']; ?></span></td>
+
+                                
+
                                             <td><span class="tag"><?php echo $row['direccion_fiscal']; ?></span></td>
 
                                             <td><span class="tag"><?php echo $row['telefono']; ?></span></td>
 
                                             <td><span class="tag"><?php echo $row['correo_electronico']; ?></span></td>
 
-                                            <td><span class="tag"><?php echo $row['tipo_contribuyente']; ?></span></td>
+                                            <td><span class="tag"><?php echo $row['pais']; ?></span></td>
 
                                             <?php
 
@@ -101,7 +105,7 @@
                                             }
                                             ?>
 
-                                            <td><span class="tag"><?php echo $row['pais']; ?></span></td>
+                                            
                                             <td>
                                                 <button class="config-btn"><i class="fas fa-sliders-h"></i></button>
                                             </td>
