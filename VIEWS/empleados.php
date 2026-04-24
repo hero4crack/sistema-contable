@@ -54,16 +54,22 @@
                                     </div>
                                     <div class="modal-body">
                                         <section class="form form-register">
-                                            <form method="POST" action="../BACKEND/conexion_reg.php">
+                                            <form method="POST" action="../BACKEND/conexion_empleados.php">
                                                                     <div class="row">
                                                     <div class="col align-self-center p-2">
-                                                        <input class="form-control" type="text" name="username" id="username" placeholder="Ingrese su Nombre" required>
+                                                        <input class="form-control" type="text" name="cedula" id="cedula" placeholder="Ingrese su Cedula" required>
                                                     </div>
                                                 </div>
 
                                                 <div class="row">
                                                     <div class="col align-self-center p-2">
-                                                        <input class="form-control" type="password" name="password_hash" id="password_hash" placeholder="Ingrese su Correo" required>
+                                                        <input class="form-control" type="password" name="nombre" id="nombre" placeholder="Ingrese su Nombre completo" required>
+                                                    </div>
+                                                </div>
+
+                                                 <div class="row">
+                                                    <div class="col align-self-center p-2">
+                                                        <input class="form-control" type="password" name="telefono" id="telefono" placeholder="Ingrese su telefono" required>
                                                     </div>
                                                 </div>
 
@@ -94,7 +100,6 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Empresa (ID)</th>
                                         <th>Cédula</th>
                                         <th>Nombre Completo</th>
                                         <th>Número de Telefono</th>
@@ -106,18 +111,19 @@
                                         <tr>
                                             <td>#<?php echo htmlspecialchars($row['id_empleado']); ?></td>
 
+                                           <!--
                                             <td><i class="fas fa-building" style="color: #94a3b8;"></i>
 
-                                                <?php
+                                                </*?php
 
                                                 $sql = "SELECT * FROM empresas_clientes WHERE id_empresa = '" . $row['id_empresa'] . "'";
                                                 $result2 = $conexion->query($sql);
                                                 $row2 = mysqli_fetch_assoc($result2);
 
-                                                echo $row2['nombre_empresa']; ?>
+                                                echo $row2['nombre_empresa']; */?>
 
 
-                                            </td>
+                                            </td>-->
 
                                             <td><strong><?php echo htmlspecialchars($row['cedula']); ?></strong></td>
 
