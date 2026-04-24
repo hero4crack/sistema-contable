@@ -26,7 +26,7 @@
                     
                     <button class="m-2" type="submit" name="iniciar">Iniciar sesion</button>
                 </form>
-                <p><a href="../VIEWS/registro.php">Registrarse</a></p>
+               
                 
             </div>
             
