@@ -16,21 +16,15 @@
     <div class="flip-card w-50 m-auto" id="flipCard">
         <div class="flip-card-inner">
             <div class="flip-card-front">
-                <form id="loginForm">
+                <form id="loginForm" method="GET" action="../BACKEND/conexion_login.php">
                     <h1 style="color: black; text-align: center;">INICIO
                     </h1>
-                    <input class="m-1" type="text" placeholder="usuario" required>
+                    <input class="m-1" type="text" placeholder="usuario" name="username" required>
 
-                    <input class="m-1" type="password" placeholder="contraseña" required>
+                    <input class="m-1" type="password" placeholder="contraseña" name="password" required>
 
-                    <div style="position: relative;">
-                        <input type="checkbox" id="rememberPassword">
-                        <label for="rememberPassword">Recordar contraseña</label>
-                        <div class="password-toggle" onclick="togglePasswordVisibility()">
-                            <i class="far fa-eye" id="togglePassword"></i>
-                        </div>
-                    </div>
-                    <button class="m-2" type="submit">Iniciar sesion</button>
+                    
+                    <button class="m-2" type="submit" name="iniciar">Iniciar sesion</button>
                 </form>
                 <p><a href="../VIEWS/registro.php">Registrarse</a></p>
                 

@@ -117,7 +117,7 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-mai
 }
 
 /* El menú oculto por defecto */
-.dropdown-menu {
+.menu-plegable {
     position: absolute;
     top: 100%;
     right: 0;
@@ -135,13 +135,13 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-mai
 }
 
 /* Mostrar el menú cuando está activo */
-.user-menu-container.active .dropdown-menu {
+.user-menu-container.active .menu-plegable {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
 }
 
-.dropdown-menu a {
+.menu-plegable a {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -152,18 +152,18 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-mai
     transition: background-color 0.1s;
 }
 
-.dropdown-menu a i {
+.menu-plegable a i {
     width: 16px;
     text-align: center;
     color: #94a3b8;
 }
 
-.dropdown-menu a:hover {
+.menu-plegable a:hover {
     background-color: #f8fafc;
     color: #3b82f6; /* Color de acento de tu sistema */
 }
 
-.dropdown-menu a:hover i {
+.menu-plegable a:hover i {
     color: #3b82f6;
 }
 
@@ -173,11 +173,11 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-mai
     margin: 5px 0;
 }
 
-.dropdown-menu .logout-link:hover {
+.menu-plegable .logout-link:hover {
     background-color: #fef2f2;
     color: #ef4444; /* Color rojo para cerrar sesión */
 }
 
-.dropdown-menu .logout-link:hover i {
+.menu-plegable .logout-link:hover i {
     color: #ef4444;
 }
