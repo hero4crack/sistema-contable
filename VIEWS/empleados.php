@@ -20,9 +20,9 @@
             <nav class="menu">
                 <a href="../VIEWS/inicio.php"><i class="fas fa-chart-line"></i>Inicio</a>
                 <a href="../VIEWS/empresas_clientes.php"><i class="fas fa-city"></i> Empresas Clientes</a>
-                <a href="#"><i class="fas fa-city"></i>Libro de Facturas</a>
-                <a href="../VIEWS/empleados.php" class="active"><i class="fas fa-users"></i> Empleados</a>
+                <a href="./libro_facturas.php"><i class="fas fa-city"></i>Libro de Facturas</a>
                 <a href=""><i class="fas fa-book"></i> Asientos Diario</a>
+                <a href="../VIEWS/empleados.php" class="active"><i class="fas fa-users"></i> Empleados</a>
                 <a href="#"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
                 <a href="#"><i class="fas fa-shield-alt"></i> Auditoría</a>
             </nav>
@@ -66,12 +66,7 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="row">
-                                                    <div class="col align-self-center p-2">
-                                                        <input class="form-control" type="text" name="rol" id="rol" placeholder="Ingrese el Rol" required>
-
-                                                    </div>
-                                                </div>
+                                            
                                                 <input class="btn btn-primary m-1" type="submit" value="Registrar">
                                             </form>
                                             
@@ -127,8 +122,12 @@
 
                                             <td><?php echo htmlspecialchars($row['nombre_completo']); ?></td>
 
+                                             <td><?php echo htmlspecialchars($row['telefono']); ?></td>
+
                                             <td>
-                                                
+                                                <td>
+                                                <button class="config-btn"><i class="fas fa-sliders-h"></i></button>
+                                            </td>
                                             </td>
                                         </tr>
                                     <?php } ?>
