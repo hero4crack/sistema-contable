@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Libro de Facturas | Contable EA</title>
+    <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -22,22 +23,8 @@
         </aside>
 
         <main class="viewport">
-            <header class="navbar">
-                <div class="nav-title">LIBRO DE COMPRAS Y VENTAS</div>
-                <div class="user-menu-container" id="userMenu">
-                    <div class="user-info">
-                        <span class="user-name">Administrador</span>
-                        <div class="user-avatar">EA</div>
-                        <i class="fas fa-chevron-down caret"></i>
-                    </div>
-                    <div class="dropdown-menu">
-                        <a href="#"><i class="fas fa-user-cog"></i> Mi Perfil</a>
-                        <a href="#"><i class="fas fa-key"></i> Cambiar Contraseña</a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="logout-link"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
-                    </div>
-                </div>
-            </header>
+          
+        <?php include('header.php') ?>
 
             <section class="content">
                 <div class="card">

@@ -56,6 +56,10 @@
                                         <th>RIF</th>
                                         <th>Razón Social</th>
                                         <th>Contribuyente</th>
+                                        <th>Dirección Fiscal</th>
+                                        <th>Telefono</th>
+                                        <th>Correo Electronico</th>
+                                        <th>País</th>
                                         <th>Estatus</th>
                                         <th>Acciones</th>
                                     </tr>
