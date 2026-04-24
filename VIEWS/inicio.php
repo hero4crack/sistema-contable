@@ -25,6 +25,5 @@
             <?php include_once ('header.php'); ?>
         </main>
     </div>
-vvv
 </body>
 </html>
