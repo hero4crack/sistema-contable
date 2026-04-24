@@ -63,13 +63,13 @@
 
                                                 <div class="row">
                                                     <div class="col align-self-center p-2">
-                                                        <input class="form-control" type="password" name="nombre" id="nombre" placeholder="Ingrese su Nombre completo" required>
+                                                        <input class="form-control" type="text" name="nombre" id="nombre" placeholder="Ingrese su Nombre completo" required>
                                                     </div>
                                                 </div>
 
                                                  <div class="row">
                                                     <div class="col align-self-center p-2">
-                                                        <input class="form-control" type="password" name="telefono" id="telefono" placeholder="Ingrese su telefono" required>
+                                                        <input class="form-control" type="text" name="telefono" id="telefono" placeholder="Ingrese su telefono" required>
                                                     </div>
                                                 </div>
 
