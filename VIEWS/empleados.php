@@ -19,7 +19,7 @@
             <div class="brand"><i class="fas fa-calculator"></i> CONTABLE EA</div>
             <nav class="menu">
                 <a href="../VIEWS/inicio.php"><i class="fas fa-home""></i>Inicio</a>
-                <a href="../VIEWS/empresas_clientes.php"><i class="fas fa-city"></i> Empresas Clientes</a>
+                <a href=" ../VIEWS/empresas_clientes.php"><i class="fas fa-city"></i> Empresas Clientes</a>
                 <a href="./libro_facturas.php"><i class="fas fa-city"></i>Libro de Facturas</a>
                 <a href="../VIEWS/libro_facturas.php"><i class="fas fa-file-invoice"></i>Libro de Facturas</a>
                 <a href=""><i class="fas fa-book"></i> Asientos Diario</a>
@@ -55,7 +55,7 @@
                                     <div class="modal-body">
                                         <section class="form form-register">
                                             <form method="POST" action="../BACKEND/conexion_empleados.php">
-                                                                    <div class="row">
+                                                <div class="row">
                                                     <div class="col align-self-center p-2">
                                                         <input class="form-control" type="text" name="cedula" id="cedula" placeholder="Ingrese su Cedula" required>
                                                     </div>
@@ -67,20 +67,20 @@
                                                     </div>
                                                 </div>
 
-                                                 <div class="row">
+                                                <div class="row">
                                                     <div class="col align-self-center p-2">
                                                         <input class="form-control" type="text" name="telefono" id="telefono" placeholder="Ingrese su telefono" required>
                                                     </div>
                                                 </div>
 
-                                            
+
                                                 <input class="btn btn-primary m-1" type="submit" value="Registrar">
                                             </form>
-                                            
+
                                         </section>
 
                                     </div>
-                                
+
                                 </div>
                             </div>
                         </div>
@@ -111,7 +111,7 @@
                                         <tr>
                                             <td>#<?php echo htmlspecialchars($row['id_empleado']); ?></td>
 
-                                           <!--
+                                            <!--
                                             <td><i class="fas fa-building" style="color: #94a3b8;"></i>
 
                                                 </*?php
@@ -129,10 +129,56 @@
 
                                             <td><?php echo htmlspecialchars($row['nombre_completo']); ?></td>
 
-                                             <td><?php echo htmlspecialchars($row['telefono']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['telefono']); ?></td>
 
-                                                <td>
-                                                <button class="config-btn"><i class="fas fa-sliders-h"></i></button>
+                                            <td>
+
+                                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal<?php echo $row['id_empleado'] ?>">
+                                                    </i> EDITAR EMPLEADO
+                                                </button>
+
+
+                                                <div class="modal fade" id="exampleModal<?php echo $row['id_empleado'] ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h1 class="modal-title fs-5 fw-bold text-center" id="exampleModalLabel">EDITAR</h1>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <section class="form form-register">
+                                                                    <form method="POST" action="../BACKEND/editar_empleado.php">
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <input class="form-control" type="text" name="cedula" id="cedula" placeholder="Ingrese su Cedula" value="<?php echo $row['cedula'] ?>" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <input class="form-control" type="text" name="nombre" id="nombre" placeholder="Ingrese su Nombre completo" value="<?php echo $row['nombre_completo'] ?>" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <input class="form-control" type="text" name="telefono" id="telefono" placeholder="Ingrese su telefono" value="<?php echo $row['telefono'] ?>" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <input type="hidden" id="id" name="id" value="<?php echo $row['id_empleado'] ?>">
+                                                                        <input class="btn btn-primary m-1" type="submit" value="Editar">
+                                                                    </form>
+
+                                                                </section>
+
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <a href=../BACKEND/eliminar_empleado.php?id_empleado=<?php echo $row['id_empleado'] ?>" class="btn btn-danger fs-6 text-white link-underline link-underline-opacity-0"> ELIMINAR</a>
                                             </td>
                                         </tr>
                                     <?php } ?>

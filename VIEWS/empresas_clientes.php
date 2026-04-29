@@ -21,7 +21,7 @@
                 <a href="../VIEWS/inicio.php"><i class="fas fa-home"></i>Inicio</a>
                 <a href="../VIEWS/empresas_clientes.php" class="active"><i class="fas fa-city"></i> Empresas Clientes</a>
                 <a href="../VIEWS/libro_facturas.php"><i class="fas fa-file-invoice""></i> Libro de Facturas</a>
-                <a href="#"><i class="fas fa-book"></i> Asientos Diario</a>
+                <a href=" #"><i class="fas fa-book"></i> Asientos Diario</a>
                 <a href="../VIEWS/empleados.php" class="active"><i class="fas fa-users"></i> Empleados</a>
                 <a href="#"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
                 <a href="#"><i class="fas fa-shield-alt"></i> Auditoría</a>
@@ -36,9 +36,96 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; padding: 20px; border-bottom: 1px solid #e2e8f0;">
                         <input type="text" placeholder="Buscar empresa..." style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; width: 300px;">
-                        <button class="bg-primary primary-btn fw-normal p-2 h-25">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                             <i class="fas fa-plus"></i> AGREGAR CLIENTE
                         </button>
+
+
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5 fw-bold text-center" id="exampleModalLabel">REGISTRO</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <section class="form form-register">
+                                            <form method="POST" action="../BACKEND/registro_empresa.php">
+                                                <div class="row">
+                                                    <div class="col align-self-center p-2">
+                                                        <input class="form-control" type="text" name="empresa" id="empresa" placeholder="Ingrese su empresa" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text" id="basic-addon3">J-</span>
+                                                        <input class="form-control" type="text" name="rif" id="rif" placeholder="Ingrese su RIF" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col align-self-center p-2">
+                                                        <input class="form-control" type="text" name="social" id="social" placeholder="Ingrese su razon social" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-12">
+
+                                                    <select class="form-select fs-6" id="contribuyente" name="contribuyente">
+                                                        <option disabled selected> Elija su tipo de contribuyente</option>
+                                                        <option value="ORDINARIO">Ordinario</option>
+                                                        <option value="ESPECIAL">Especial</option>
+                                                        <option value="FORMAL">Formal</option>
+                                                    </select>
+                                                </div>
+
+
+                                                <div class="row">
+                                                    <div class="col align-self-center p-2">
+                                                        <input class="form-control" type="text" name="direccion" id="direccion" placeholder="Ingrese su direccion" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col align-self-center p-2">
+                                                        <input class="form-control" type="text" name="telefono" id="telefono" placeholder="Ingrese su telefono" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col align-self-center p-2">
+                                                        <input class="form-control" type="text" name="correo" id="correo" placeholder="Ingrese su correo" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col align-self-center p-2">
+                                                        <input class="form-control" type="text" name="pais" id="pais" placeholder="Ingrese su pais" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col align-self-center p-2">
+                                                        <select class="form-select fs-6" id="contribuyente" name="contribuyente">
+                                                            <option value="1">Activo</option>
+                                                            <option value="0">No activo</option>
+
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+
+                                                <input class="btn btn-primary m-1" type="submit" value="Registrar">
+                                            </form>
+
+                                        </section>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <?php $sql = "SELECT * FROM empresas_clientes";
@@ -78,13 +165,13 @@
                                                     <?php echo $row['nombre_empresa']; ?>
                                                 </div>
                                             </td>
-                                            <td><strong><?php echo $row['rif']; ?></strong></td>
+                                            <td><strong>J- <?php echo $row['rif']; ?></strong></td>
 
                                             <td><?php echo $row['razon_social']; ?></td>
 
                                             <td><span class="tag"><?php echo $row['tipo_contribuyente']; ?></span></td>
 
-                                
+
 
                                             <td><span class="tag"><?php echo $row['direccion_fiscal']; ?></span></td>
 
@@ -101,13 +188,104 @@
                                                 echo "<td class='fw-bold'> activo </td>";
                                             } else {
 
-                                                echo "<td> En proceso </td>";
+                                                echo "<td> No activo </td>";
                                             }
                                             ?>
 
-                                            
+
                                             <td>
-                                                <button class="config-btn"><i class="fas fa-sliders-h"></i></button>
+                                                <button type="button" class="btn btn-warning text-light" data-bs-toggle="modal" data-bs-target="#exampleModal<?php echo $row['id_empresa'] ?>">
+                                                    EDITAR
+                                                </button>
+
+
+                                                <div class="modal fade" id="exampleModal<?php echo $row['id_empresa'] ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h1 class="modal-title fs-5 fw-bold text-center" id="exampleModalLabel"> EDITAR </h1>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <section class="form form-register">
+                                                                    <form method="POST" action="../BACKEND/editar_empresa.php">
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <input class="form-control" type="text" name="empresa" id="empresa" value="<?php echo $row['nombre_empresa']?>" placeholder="Ingrese su empresa" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row">
+                                                                            <div class="input-group">
+                                                                                <span class="input-group-text" id="basic-addon3">J-</span>
+                                                                                <input class="form-control" type="text" name="rif" id="rif" value="<?php echo $row['rif']?>" placeholder="Ingrese su RIF" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <input class="form-control" type="text" name="social" id="social" value="<?php echo $row['razon_social']?>" placeholder="Ingrese su razon social" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-md-12">
+
+                                                                            <select class="form-select fs-6" id="contribuyente" name="contribuyente">
+                                                                                <option disabled selected> Elija su tipo de contribuyente</option>
+                                                                                <option value="ORDINARIO">Ordinario</option>
+                                                                                <option value="ESPECIAL">Especial</option>
+                                                                                <option value="FORMAL">Formal</option>
+                                                                            </select>
+                                                                        </div>
+
+
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <input class="form-control" type="text" name="direccion" id="direccion" value="<?php echo $row['direccion_fiscal']?>" placeholder="Ingrese su direccion" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <input class="form-control" type="text" name="telefono" id="telefono" value="<?php echo $row['telefono']?>" placeholder="Ingrese su telefono" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <input class="form-control" type="text" name="correo" id="correo" value="<?php echo $row['correo_electronico']?>" placeholder="Ingrese su correo" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <input class="form-control" type="text" name="pais" id="pais" value="<?php echo $row['pais']?>" placeholder="Ingrese su pais" required>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row">
+                                                                            <div class="col align-self-center p-2">
+                                                                                <select class="form-select fs-6" id="estado" name="estado">
+                                                                                    <option value="1">Activo</option>
+                                                                                    <option value="0">No activo</option>
+
+                                                                                </select>
+                                                                            </div>  
+                                                                        </div>
+                                                                        <input type="hidden" id="id" name="id" value="<?php echo $row['id_empresa'] ?>">
+
+                                                                        <input class="btn btn-primary m-1" type="submit" value="Registrar">
+                                                                    </form>
+
+                                                                </section>
+
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <a href=../BACKEND/eliminar_empresa.php?id_empresa=<?php echo $row['id_empresa'] ?>" class="btn btn-danger fs-6 text-white link-underline link-underline-opacity-0"> ELIMINAR</a>
                                             </td>
                                         </tr>
                                     <?php } ?>
