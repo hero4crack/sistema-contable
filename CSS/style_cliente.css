@@ -1,6 +1,6 @@
 :root {
     --bg-main: #f4f7f6;
-    --sidebar-color: #1e293b;
+    --sidebar-color: #182738;
     --accent: #3b82f6;
     --text-dark: #334155;
     --border: #e2e8f0;
@@ -9,27 +9,58 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-main); color: var(--text-dark); margin-left: 14% ; }
+body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-main); color: var(--text-dark);}
+
+
 
 .app-container { display: flex; height: 100vh; }
 
 /* Sidebar */
 .main-sidebar { position:fixed; top:0; left:0; height:100vh; /* this will make it go ontop of other content, 
-  the index is the "layer" its on so make it as low as you can. */ z-index: 99; width: 250px; background: var(--sidebar-color); color: white; padding-top: 20px; height: 100vh; }
+  the index is the "layer" its on so make it as low as you can. */ z-index: 99; max-width: 17%; background: var(--sidebar-color); color: white; padding-top: 20px; height: 100vh; }
+
+  
 .brand { padding: 0 25px 40px; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--accent); }
 
+@media (max-width: 1150px) {
+    .brand { padding: 0 25px 40px; font-weight: 800; font-size: 1rem; display: block; align-items: center; gap: 10px; color: var(--accent); }
+}
+
 .menu a { display: flex; align-items: center; padding: 14px 25px; color: #94a3b8; text-decoration: none; font-size: 0.9rem; border-left: 4px solid transparent; }
+
+
+@media (max-width: 1150px) {
+    .menu a { display: block; align-items: center; padding: 14px 25px; color: #94a3b8; text-decoration: none; font-size: 0.9rem; border-left: 4px solid transparent; }
+}
 .menu a i { width: 25px; }
 .menu a:hover, .menu a.active { background: #334155; color: white; border-left-color: var(--accent); }
 
 /* Main Area */
-.viewport { flex: 1; display: flex; flex-direction: column; }
-.navbar { height: 70px; background: white; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; }
-.nav-title { font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
+.viewport { flex: 1; display: flex; flex-direction: column; margin-left: 12%;}
+
+@media (max-width: 1600px) {
+    .viewport{
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        margin-left: 15%;
+    }
+}
+
+@media (max-width: 768px) {
+    .viewport{
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        margin-left: 17%;
+    }
+}
+.navbar { height: 70px; background: var(--sidebar-color); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; }
+.nav-title { font-weight: 600; color: #f7faff; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
 
 .user-info { display: flex; align-items: center; gap: 15px; }
 .user-text { text-align: right; }
-.user-text .role { display: block; font-size: 0.7rem; color: #94a3b8; }
+.user-text .role { display: block; font-size: 0.7rem; color: #f6faff; }
 .user-text .name { font-weight: 600; font-size: 0.9rem; }
 .user-avatar { width: 40px; height: 40px; background: var(--accent); color: white; border-radius: 8px; display: grid; place-items: center; font-weight: bold; }
 
@@ -76,7 +107,7 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-mai
 
 .navbar {
     display: flex;
-    justify-content: space-between;
+    justify-content:right;
     align-items: center;
     padding: 10px 30px;
 }
@@ -97,12 +128,12 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-mai
 }
 
 .user-info:hover {
-    background-color: #f1f5f9; /* Color suave al pasar el mouse */
+    background-color: #5a5b7e; /* Color suave al pasar el mouse */
 }
 
 .user-name {
     font-size: 0.9rem;
-    color: #334155;
+    color: #f3f8ff;
     font-weight: 600;
 }
 

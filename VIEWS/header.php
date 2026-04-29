@@ -2,7 +2,7 @@
 
 
 <header class="navbar">
-                <div class="nav-title">Inicio</div>
+                <!--<div class="nav-title">Inicio</div>-->
                 
                 <div class="user-menu-container" id="userMenu">
                     <div class="user-info">

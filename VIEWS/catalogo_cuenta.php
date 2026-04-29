@@ -33,8 +33,10 @@ $datos_catalogo = obtenerCatalogo($conexion);
                 </nav>
             </aside>
                 <main class="viewport">
+
                     <?php include_once('header.php') ?>
 
+                    <section class="content">
     <div class="table-wrapper">
         <table class="contable-table">
             <thead>
@@ -76,6 +78,7 @@ $datos_catalogo = obtenerCatalogo($conexion);
                 </tbody>
             </table>
             </div>
+                    </section>
         </main>
     </div>
     <script>
