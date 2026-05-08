@@ -3,7 +3,7 @@ require_once 'conecxion_bd.php';
 
 // Función para listar empresas y llenar el "Select" del formulario
 function obtenerEmpresasParaFactura($conexion) {
-    $sql = "SELECT id_empresa, nombre_empresa FROM empresas_clientes WHERE estatus = 'activo'";
+    $sql = "SELECT id_empresa, nombre_empresa FROM empresas_clientes WHERE estado_activo = '1'";
     $resultado = $conexion->query($sql);
     return $resultado;
 }
