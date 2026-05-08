@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 4. Ejecutamos la consulta
     if ($conexion->query($sql) === TRUE) {
         // Si todo sale bien, redirigimos de vuelta al libro con un mensaje de éxito
-        header("Location: ../VIEWS/libro_factura.php");
+        header("Location: ../VIEWS/libro_facturas.php?status=success");
     } else {
         // Si hay un error, lo mostramos
         echo "Error al registrar: " . $conexion->error;
@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 } else {
     // Si alguien intenta entrar al archivo sin enviar el formulario
-    header("Location: ../VIEWS/libro_factura.php");
+    header("Location: ../VIEWS/libro_facturas.php");
 }
 
 $conexion->close();

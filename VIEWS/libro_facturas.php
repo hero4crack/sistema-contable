@@ -23,6 +23,12 @@ $facturas = obtenerLibroFacturas($conexion);
 </head>
 
 <body>
+    <?php if(isset($_GET['status']) && $_GET['status'] == 'success'): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 20px;">
+        <strong>¡Excelente!</strong> La factura ha sido registrada correctamente en el libro.
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
     <div class="app-container">
         <aside class="main-sidebar">
             <div class="brand"><i class="fas fa-calculator"></i> CONTABLE EA</div>
@@ -86,7 +92,7 @@ $facturas = obtenerLibroFacturas($conexion);
                                             <td style="font-weight: 800; color: #1e293b;"><?php echo number_format($f['total_factura'], 2); ?> $</td>
                                             <td>
                                                 <button class="config-btn" title="Ver Detalle"><i class="fas fa-eye"></i></button>
-                                                <button class="config-btn" title="Imprimir" style="color: #3b82f6;"><i class="fas fa-print"></i></button>
+                                               <a href=../BACKEND/eliminar_facturas.php?id_factura=<?php echo $f['id_factura'] ?> class="btn btn-danger fs-6 text-white link-underline link-underline-opacity-0"> <i class="fa-solid fa-trash"></i></a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
