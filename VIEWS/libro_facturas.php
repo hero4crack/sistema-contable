@@ -1,3 +1,15 @@
+<?php
+// 1. Conexión a la base de datos (usando tu archivo con "cx")
+require_once '../BACKEND/conecxion_bd.php'; 
+
+// 2. Llamamos al archivo de consultas que creamos hoy
+require_once '../BACKEND/consulta_factura.php'; 
+
+// 3. Obtenemos las facturas reales de la base de datos
+// Pasamos $conexion porque es la variable que definiste en conecxion_bd.php
+$facturas = obtenerLibroFacturas($conexion); 
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -37,8 +49,8 @@
                             </select>
                             <input type="text" placeholder="Buscar por RIF o Nro Factura..." class="search-input" style="width: 250px; margin-left: 10px;">
                         </div>
-                        <button class="primary-btn" style="background: #10b981;">
-                           <i class="fas fa-plus-circle"></i> REGISTRAR NUEVA FACTURA
+                        <button class="primary-btn" style="background: #10b981;" data-bs-toggle="modal" data-bs-target="#modalRegistro">
+                            <i class="fas fa-plus-circle"></i> REGISTRAR NUEVA FACTURA
                         </button>
                     </div>
 
@@ -99,5 +111,70 @@
             userMenu.classList.remove('active');
         }
     </script>
+
+    <div class="modal fade" id="modalRegistro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+      <div class="modal-header" style="background: #1e293b; color: white; border-radius: 15px 15px 0 0;">
+        <h5 class="modal-title"><i class="fas fa-file-invoice"></i> Nueva Factura Fiscal</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="../BACKEND/guardar_factura.php" method="POST">
+        <div class="modal-body" style="padding: 30px;">
+          <div class="row g-3">
+            <div class="col-md-12 mb-3">
+              <label class="form-label" style="font-weight: 600;">Empresa Cliente</label>
+              <select name="id_empresa" class="form-select" required>
+                <option value="">Seleccione la empresa...</option>
+                <?php 
+                // Aquí usamos la variable que ya cargamos en el Backend
+                $empresas = obtenerEmpresasParaFactura($conexion);
+                while($emp = $empresas->fetch_assoc()): 
+                ?>
+                  <option value="<?php echo $emp['id_empresa']; ?>"><?php echo $emp['nombre_empresa']; ?></option>
+                <?php endwhile; ?>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Nro. Factura</label>
+              <input type="text" name="nro_factura" class="form-control" placeholder="0001" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nro. Control</label>
+              <input type="text" name="nro_control" class="form-control" placeholder="00-001">
+            </div>
+
+            <div class="col-md-4 mt-4">
+              <label class="form-label">Base Imponible ($)</label>
+              <input type="number" step="0.01" name="base_imponible" id="base_modal" class="form-control" oninput="calcularIvaModal()" required>
+            </div>
+            <div class="col-md-4 mt-4">
+              <label class="form-label">Monto Exento ($)</label>
+              <input type="number" step="0.01" name="monto_exento" id="exento_modal" class="form-control" oninput="calcularIvaModal()" value="0.00">
+            </div>
+            <div class="col-md-4 mt-4">
+              <label class="form-label">IVA (16%)</label>
+              <input type="text" name="monto_iva" id="iva_modal" class="form-control" readonly style="background: #f8fafc;">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="background: #f8fafc; border-radius: 0 0 15px 15px;">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success" style="background: #10b981; border: none; padding: 10px 25px;">Guardar Factura</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function calcularIvaModal() {
+    const base = parseFloat(document.getElementById('base_modal').value) || 0;
+    const iva = base * 0.16;
+    document.getElementById('iva_modal').value = iva.toFixed(2);
+}
+</script>
+
 </body>
 </html>
