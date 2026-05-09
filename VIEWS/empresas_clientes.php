@@ -21,7 +21,7 @@
                 <a href="../VIEWS/inicio.php"><i class="fas fa-home"></i>Inicio</a>
                 <a href="../VIEWS/empresas_clientes.php" class="active"><i class="fas fa-city"></i> Empresas Clientes</a>
                 <a href="../VIEWS/libro_facturas.php"><i class="fas fa-file-invoice""></i> Libro de Facturas</a>
-                <a href=" #"><i class="fas fa-book"></i> Asientos Diario</a>
+                <a href="../VIEWS/asientos_diario.php"><i class="fas fa-book"></i> Asientos Diario</a>
                 <a href="../VIEWS/empleados.php"><i class="fas fa-users"></i> Empleados</a>
                 <a href="../VIEWS/catalogo_cuenta.php"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
                 <a href="#"><i class="fas fa-shield-alt"></i> Auditoría</a>
