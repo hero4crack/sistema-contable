@@ -6,7 +6,8 @@ include_once('conecxion_bd.php');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Obtener y sanitizar los datos del formulario
     $empresa = $_POST['empresa'];
-    $rif = $_POST['rif'];
+
+    $rif = $_POST['letra']."".$_POST['rif'];
     $social = $_POST['social'];
     $contribuyente = $_POST['contribuyente'];
     $direccion = $_POST['direccion'];

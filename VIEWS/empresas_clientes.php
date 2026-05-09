@@ -6,6 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Entidades | Contable EA</title>
+    <link rel="stylesheet" href="../DATATABLE/datatables1.css">
     <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -21,7 +22,7 @@
                 <a href="../VIEWS/inicio.php"><i class="fas fa-home"></i>Inicio</a>
                 <a href="../VIEWS/empresas_clientes.php" class="active"><i class="fas fa-city"></i> Empresas Clientes</a>
                 <a href="../VIEWS/libro_facturas.php"><i class="fas fa-file-invoice""></i> Libro de Facturas</a>
-                <a href="../VIEWS/asientos_diario.php"><i class="fas fa-book"></i> Asientos Diario</a>
+                <a href=" ../VIEWS/asientos_diario.php"><i class="fas fa-book"></i> Asientos Diario</a>
                 <a href="../VIEWS/empleados.php"><i class="fas fa-users"></i> Empleados</a>
                 <a href="../VIEWS/catalogo_cuenta.php"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
                 <a href="#"><i class="fas fa-shield-alt"></i> Auditoría</a>
@@ -59,7 +60,12 @@
 
                                                 <div class="row">
                                                     <div class="input-group">
-                                                        <span class="input-group-text" id="basic-addon3">J-</span>
+                                                        <select class="form-select fs-6 mb-2" id="letra" name="letra">
+                                            
+                                                        <option value="V-">(Venezolano) V-</option>
+                                                        <option value="J-">(Juridico) J-</option>
+                                                        <option value="E-">(Extranjero) E-</option>
+                                                    </select>
                                                         <input class="form-control" type="text" name="rif" id="rif" placeholder="Ingrese su RIF" required>
                                                     </div>
                                                 </div>
@@ -165,7 +171,7 @@
                                                     <?php echo $row['nombre_empresa']; ?>
                                                 </div>
                                             </td>
-                                            <td><strong>J- <?php echo $row['rif']; ?></strong></td>
+                                            <td><strong> <?php echo $row['rif']; ?></strong></td>
 
                                             <td><?php echo $row['razon_social']; ?></td>
 
@@ -211,20 +217,20 @@
                                                                     <form method="POST" action="../BACKEND/editar_empresa.php">
                                                                         <div class="row">
                                                                             <div class="col align-self-center p-2">
-                                                                                <input class="form-control" type="text" name="empresa" id="empresa" value="<?php echo $row['nombre_empresa']?>" placeholder="Ingrese su empresa" required>
+                                                                                <input class="form-control" type="text" name="empresa" id="empresa" value="<?php echo $row['nombre_empresa'] ?>" placeholder="Ingrese su empresa" required>
                                                                             </div>
                                                                         </div>
 
                                                                         <div class="row">
                                                                             <div class="input-group">
-                                                                                <span class="input-group-text" id="basic-addon3">J-</span>
-                                                                                <input class="form-control" type="text" name="rif" id="rif" value="<?php echo $row['rif']?>" placeholder="Ingrese su RIF" required>
+                                                                                
+                                                                                <input class="form-control" type="text" name="rif" id="rif" value="<?php echo $row['rif'] ?>" placeholder="Ingrese su RIF" required>
                                                                             </div>
                                                                         </div>
 
                                                                         <div class="row">
                                                                             <div class="col align-self-center p-2">
-                                                                                <input class="form-control" type="text" name="social" id="social" value="<?php echo $row['razon_social']?>" placeholder="Ingrese su razon social" required>
+                                                                                <input class="form-control" type="text" name="social" id="social" value="<?php echo $row['razon_social'] ?>" placeholder="Ingrese su razon social" required>
                                                                             </div>
                                                                         </div>
 
@@ -241,25 +247,25 @@
 
                                                                         <div class="row">
                                                                             <div class="col align-self-center p-2">
-                                                                                <input class="form-control" type="text" name="direccion" id="direccion" value="<?php echo $row['direccion_fiscal']?>" placeholder="Ingrese su direccion" required>
+                                                                                <input class="form-control" type="text" name="direccion" id="direccion" value="<?php echo $row['direccion_fiscal'] ?>" placeholder="Ingrese su direccion" required>
                                                                             </div>
                                                                         </div>
 
                                                                         <div class="row">
                                                                             <div class="col align-self-center p-2">
-                                                                                <input class="form-control" type="text" name="telefono" id="telefono" value="<?php echo $row['telefono']?>" placeholder="Ingrese su telefono" required>
+                                                                                <input class="form-control" type="text" name="telefono" id="telefono" value="<?php echo $row['telefono'] ?>" placeholder="Ingrese su telefono" required>
                                                                             </div>
                                                                         </div>
 
                                                                         <div class="row">
                                                                             <div class="col align-self-center p-2">
-                                                                                <input class="form-control" type="text" name="correo" id="correo" value="<?php echo $row['correo_electronico']?>" placeholder="Ingrese su correo" required>
+                                                                                <input class="form-control" type="text" name="correo" id="correo" value="<?php echo $row['correo_electronico'] ?>" placeholder="Ingrese su correo" required>
                                                                             </div>
                                                                         </div>
 
                                                                         <div class="row">
                                                                             <div class="col align-self-center p-2">
-                                                                                <input class="form-control" type="text" name="pais" id="pais" value="<?php echo $row['pais']?>" placeholder="Ingrese su pais" required>
+                                                                                <input class="form-control" type="text" name="pais" id="pais" value="<?php echo $row['pais'] ?>" placeholder="Ingrese su pais" required>
                                                                             </div>
                                                                         </div>
 
@@ -270,7 +276,7 @@
                                                                                     <option value="0">No activo</option>
 
                                                                                 </select>
-                                                                            </div>  
+                                                                            </div>
                                                                         </div>
                                                                         <input type="hidden" id="id" name="id" value="<?php echo $row['id_empresa'] ?>">
 
@@ -299,6 +305,29 @@
             </section>
         </main>
     </div>
+    <script src="../JQUERY/jquery.js"></script>
+        <script src="../DATATABLE/datatables1.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('#tabla').DataTable({
+                    lengthMenu: [5, 10, 25, 50, 100],
+                    pageLength: 25,
+                    language: {
+                        lengthMenu: "Mostrar MENU registros por pagina",
+                        zeroRecords: "Sin resultado - disculpa",
+                        info: "Mostrando la pagina PAGE de PAGES",
+                        infoEmpty: "No records available",
+                        infoFiltered: "(filtrado de  MAX registros totales)",
+                        search: "Buscar: ",
+                        paginate: {
+                            next: "Siguientes",
+                            previous: "Anterior"
+                        },
+                    }
+                });
+            });
+        </script>
+
     <script>
         document.getElementById('userMenu').addEventListener('click', function(e) {
             // Previene que se cierre si haces clic dentro del menú
