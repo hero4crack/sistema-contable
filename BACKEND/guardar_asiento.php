@@ -1,6 +1,6 @@
 <?php
 require_once 'conecxion_bd.php';
-session_start(); // 1. IMPORTANTE: Iniciar sesión para saber quién es el usuario
+session_start();// 1. IMPORTANTE: Iniciar sesión para saber quién es el usuario
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fecha = $_POST['fecha_asiento'];
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($conexion->query($sql_cabecera)) {
         $id_asiento = $conexion->insert_id; 
         
-        $cuentas = $_POST['id_cuenta'];
+        $cuentas = $_POST['cuentas'];
         $debes = $_POST['debe'];
         $haberes = $_POST['haber'];
 
