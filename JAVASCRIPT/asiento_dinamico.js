@@ -12,12 +12,12 @@ function agregarFila() {
     
     nuevaFila.innerHTML = `
         <td>
-            <select name="cuentas[]" class="form-select cuenta-select" required>
+            <select name="id_cuentas" class="form-select cuenta-select" required>
                 <option value="">Cargando cuentas...</option>
             </select>
         </td>
-        <td><input type="number" step="0.01" name="debe[]" class="form-control input-monto" value="0.00" oninput="validarAsiento()"></td>
-        <td><input type="number" step="0.01" name="haber[]" class="form-control input-monto" value="0.00" oninput="validarAsiento()"></td>
+        <td><input type="number" step="0.01" name="debe" class="form-control input-monto" value="0.00" oninput="validarAsiento()"></td>
+        <td><input type="number" step="0.01" name="haber" class="form-control input-monto" value="0.00" oninput="validarAsiento()"></td>
         <td class="text-center">
             <button type="button" class="btn btn-link text-danger" onclick="eliminarFila(${filaCount})"><i class="fas fa-trash"></i></button>
         </td>
@@ -35,8 +35,8 @@ function validarAsiento() {
     let tDebe = 0;
     let tHaber = 0;
     
-    document.querySelectorAll('input[name="debe[]"]').forEach(input => tDebe += parseFloat(input.value || 0));
-    document.querySelectorAll('input[name="haber[]"]').forEach(input => tHaber += parseFloat(input.value || 0));
+    document.querySelectorAll('input[name="debe"]').forEach(input => tDebe += parseFloat(input.value || 0));
+    document.querySelectorAll('input[name="haber"]').forEach(input => tHaber += parseFloat(input.value || 0));
 
     document.getElementById('totalDebe').innerText = tDebe.toFixed(2);
     document.getElementById('totalHaber').innerText = tHaber.toFixed(2);

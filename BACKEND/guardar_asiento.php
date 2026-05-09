@@ -6,18 +6,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fecha = $_POST['fecha_asiento'];
     $comprobante = $_POST['nro_comprobante'];
     $glosa = $_POST['glosa'];
-    
+
     // 2. Obtenemos el ID del usuario de la sesión. 
     // Si no existe, usamos el ID 1 por defecto para que no falle mientras pruebas.
-    $id_usuario = isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : 1; 
-    
+    $id_usuario = isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : 1;
+
     // 3. Insertar el encabezado INCLUYENDO el id_usuario
     $sql_cabecera = "INSERT INTO asiento_diario (nro_comprobante, fecha_asiento, glosa, id_usuario) 
                      VALUES ('$comprobante', '$fecha', '$glosa', '$id_usuario')";
-    
+
     if ($conexion->query($sql_cabecera)) {
-        $id_asiento = $conexion->insert_id; 
-        
+        $id_asiento = $conexion->insert_id;
+
         $cuentas = $_POST['id_cuenta'];
         $debes = $_POST['debe'];
         $haberes = $_POST['haber'];
@@ -31,11 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             VALUES ('$id_asiento', '$id_cta', '$debe', '$haber')";
             $conexion->query($sql_detalle);
         }
-        
+
         echo "<script>alert('Asiento guardado con éxito'); window.location='../VIEWS/asientos_diario.php';</script>";
     } else {
         // Esto te dirá exactamente qué campo falta si vuelve a fallar
         echo "Error en la base de datos: " . $conexion->error;
     }
 }
-?>

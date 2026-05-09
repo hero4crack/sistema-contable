@@ -83,6 +83,30 @@ $asientos = obtenerAsientos($conexion);
                             </tr>
                         </thead>
                         <tbody id="cuerpoAsiento">
+                            <script>
+        // Esta función es el "puente". 
+        // El JS la llamará cada vez que alguien dé clic en "Añadir Línea"
+        function actualizarOpcionesCuentas(selectElement) {
+            let opciones = `<option value="">Seleccione cuenta...</option>`;
+            
+            <?php 
+                // Buscamos las cuentas en la BD usando PHP
+                $cuentas = obtenerCuentasParaAsiento($conexion);
+                while($c = $cuentas->fetch_assoc()): 
+            ?>
+                // Las inyectamos en el HTML que el JS va a construir
+                opciones += `<option value="<?= $c['id_cuenta'] ?>"><?= $c['codigo_cuenta'] ?> - <?= $c['nombre_cuenta'] ?></option>`;
+            <?php endwhile; ?>
+            
+            selectElement.innerHTML = opciones;
+        }
+
+        // Esto hace que al cargar la página ya aparezcan las primeras 2 filas vacías
+        window.onload = () => { 
+            agregarFila(); 
+            agregarFila(); 
+        };
+    </script>
                             </tbody>
                         <tfoot>
                             <tr class="table-info">
@@ -110,29 +134,6 @@ $asientos = obtenerAsientos($conexion);
 </div>
     <script src="../JAVASCRIPT/asiento_dinamico.js"></script>
     
-    <script>
-        // Esta función es el "puente". 
-        // El JS la llamará cada vez que alguien dé clic en "Añadir Línea"
-        function actualizarOpcionesCuentas(selectElement) {
-            let opciones = `<option value="">Seleccione cuenta...</option>`;
-            
-            <?php 
-                // Buscamos las cuentas en la BD usando PHP
-                $cuentas = obtenerCuentasParaAsiento($conexion);
-                while($c = $cuentas->fetch_assoc()): 
-            ?>
-                // Las inyectamos en el HTML que el JS va a construir
-                opciones += `<option value="<?= $c['id_cuenta'] ?>"><?= $c['codigo_cuenta'] ?> - <?= $c['nombre_cuenta'] ?></option>`;
-            <?php endwhile; ?>
-            
-            selectElement.innerHTML = opciones;
-        }
-
-        // Esto hace que al cargar la página ya aparezcan las primeras 2 filas vacías
-        window.onload = () => { 
-            agregarFila(); 
-            agregarFila(); 
-        };
-    </script>
+    
 </body>
 </html>

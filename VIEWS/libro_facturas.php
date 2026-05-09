@@ -16,6 +16,7 @@ $facturas = obtenerLibroFacturas($conexion);
 <head>
     <meta charset="UTF-8">
     <title>Libro de Facturas | Contable EA</title>
+    <link rel="stylesheet" href="../DATATABLE/datatables1.css">
     <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -50,20 +51,14 @@ $facturas = obtenerLibroFacturas($conexion);
             <section class="content">
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
-                        <div class="search-group">
-                            <select class="filter-select">
-                                <option>Periodo: Abril 2026</option>
-                                <option>Periodo: Marzo 2026</option>
-                            </select>
-                            <input type="text" placeholder="Buscar por RIF o Nro Factura..." class="search-input" style="width: 250px; margin-left: 10px;">
-                        </div>
+                        
                         <button class="primary-btn" style="background: #10b981;" data-bs-toggle="modal" data-bs-target="#modalRegistro">
                             <i class="fas fa-plus-circle"></i> REGISTRAR NUEVA FACTURA
                         </button>
                     </div>
 
                     <div class="table-wrapper">
-                        <table class="contable-table">
+                        <table id='tabla' class="contable-table">
                             <thead>
                                 <tr>
                                     <th>Fecha</th>
@@ -76,7 +71,7 @@ $facturas = obtenerLibroFacturas($conexion);
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class='table-group-divider'>
                                 <?php if (isset($facturas)): ?>
                                     <?php foreach ($facturas as $f): ?>
                                         <tr>
@@ -175,6 +170,28 @@ $facturas = obtenerLibroFacturas($conexion);
             </div>
         </div>
     </div>
+     <script src="../JQUERY/jquery.js"></script>
+    <script src="../DATATABLE/datatables1.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#tabla').DataTable({
+                lengthMenu: [5, 10, 25, 50, 100],
+                pageLength: 25,
+                language: {
+                    //lengthMenu: "Mostrar MENU registros por pagina",
+                    zeroRecords: "Sin resultado - disculpa",
+                    //info: "Mostrando la pagina PAGE de PAGES",
+                    infoEmpty: "No records available",
+                    infoFiltered: "(filtrado de  MAX registros totales)",
+                    search: "Buscar: ",
+                    paginate: {
+                        next: "Siguientes",
+                        previous: "Anterior"
+                    },
+                }
+            });
+        });
+    </script>
 
     <script>
         function calcularIvaModal() {

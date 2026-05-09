@@ -36,7 +36,7 @@
             <section class="content">
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; padding: 20px; border-bottom: 1px solid #e2e8f0;">
-                        <input type="text" placeholder="Buscar empresa..." style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; width: 300px;">
+                    
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                             <i class="fas fa-plus"></i> AGREGAR CLIENTE
                         </button>
@@ -61,11 +61,11 @@
                                                 <div class="row">
                                                     <div class="input-group">
                                                         <select class="form-select fs-6 mb-2" id="letra" name="letra">
-                                            
-                                                        <option value="V-">(Venezolano) V-</option>
-                                                        <option value="J-">(Juridico) J-</option>
-                                                        <option value="E-">(Extranjero) E-</option>
-                                                    </select>
+
+                                                            <option value="V-">(Venezolano) V-</option>
+                                                            <option value="J-">(Juridico) J-</option>
+                                                            <option value="E-">(Extranjero) E-</option>
+                                                        </select>
                                                         <input class="form-control" type="text" name="rif" id="rif" placeholder="Ingrese su RIF" required>
                                                     </div>
                                                 </div>
@@ -141,7 +141,7 @@
                     ?>
 
                         <div class="table-wrapper">
-                            <table class="contable-table">
+                            <table id='tabla' class="contable-table">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -157,7 +157,7 @@
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class='table-group-divider'>
                                     <?php while ($row = $result->fetch_assoc()) { ?>
 
 
@@ -223,7 +223,7 @@
 
                                                                         <div class="row">
                                                                             <div class="input-group">
-                                                                                
+
                                                                                 <input class="form-control" type="text" name="rif" id="rif" value="<?php echo $row['rif'] ?>" placeholder="Ingrese su RIF" required>
                                                                             </div>
                                                                         </div>
@@ -306,27 +306,27 @@
         </main>
     </div>
     <script src="../JQUERY/jquery.js"></script>
-        <script src="../DATATABLE/datatables1.js"></script>
-        <script>
-            $(document).ready(function() {
-                $('#tabla').DataTable({
-                    lengthMenu: [5, 10, 25, 50, 100],
-                    pageLength: 25,
-                    language: {
-                        lengthMenu: "Mostrar MENU registros por pagina",
-                        zeroRecords: "Sin resultado - disculpa",
-                        info: "Mostrando la pagina PAGE de PAGES",
-                        infoEmpty: "No records available",
-                        infoFiltered: "(filtrado de  MAX registros totales)",
-                        search: "Buscar: ",
-                        paginate: {
-                            next: "Siguientes",
-                            previous: "Anterior"
-                        },
-                    }
-                });
+    <script src="../DATATABLE/datatables1.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#tabla').DataTable({
+                lengthMenu: [5, 10, 25, 50, 100],
+                pageLength: 25,
+                language: {
+                    //lengthMenu: "Mostrar MENU registros por pagina",
+                    zeroRecords: "Sin resultado - disculpa",
+                    //info: "Mostrando la pagina PAGE de PAGES",
+                    infoEmpty: "No records available",
+                    infoFiltered: "(filtrado de  MAX registros totales)",
+                    search: "Buscar: ",
+                    paginate: {
+                        next: "Siguientes",
+                        previous: "Anterior"
+                    },
+                }
             });
-        </script>
+        });
+    </script>
 
     <script>
         document.getElementById('userMenu').addEventListener('click', function(e) {
