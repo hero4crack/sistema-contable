@@ -6,6 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Empleados | Contable EA</title>
+    <link rel="stylesheet" href="../DATATABLE/datatables1.css">
     <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -95,7 +96,7 @@
                     ?>
 
                         <div class="table-wrapper">
-                            <table class="contable-table">
+                            <table id='tabla' class="contable-table">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -105,7 +106,7 @@
                                         <th>Acción</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class='table-group-divider'>
                                     <?php while ($row = $result->fetch_assoc()) { ?>
                                         <tr>
                                             <td>#<?php echo htmlspecialchars($row['id_empleado']); ?></td>
@@ -132,7 +133,7 @@
 
                                             <td>
 
-                                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal<?php echo $row['id_empleado'] ?>">
+                                                <button type="button" class="btn btn-warning fs-6" data-bs-toggle="modal" data-bs-target="#exampleModal<?php echo $row['id_empleado'] ?>">
                                                     </i> EDITAR EMPLEADO
                                                 </button>
 
@@ -190,6 +191,28 @@
             </section>
         </main>
     </div>
+   <script src="../JQUERY/jquery.js"></script>
+    <script src="../DATATABLE/datatables1.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#tabla').DataTable({
+                lengthMenu: [5, 10, 25, 50, 100],
+                pageLength: 25,
+                language: {
+                    //lengthMenu: "Mostrar MENU registros por pagina",
+                    zeroRecords: "Sin resultado - disculpa",
+                    //info: "Mostrando la pagina PAGE de PAGES",
+                    infoEmpty: "No records available",
+                    infoFiltered: "(filtrado de  MAX registros totales)",
+                    search: "Buscar: ",
+                    paginate: {
+                        next: "Siguientes",
+                        previous: "Anterior"
+                    },
+                }
+            });
+        });
+    </script>
     <script>
         document.getElementById('userMenu').addEventListener('click', function(e) {
             // Previene que se cierre si haces clic dentro del menú

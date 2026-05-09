@@ -1,56 +1,71 @@
 let filaCount = 0;
-
 function agregarFila() {
-    filaCount++;
     const cuerpo = document.getElementById('cuerpoAsiento');
-    const nuevaFila = document.createElement('tr');
-    nuevaFila.id = `fila_${filaCount}`;
-    
-    // NOTA: Para que el SELECT de cuentas funcione desde un archivo .js puro,
-    // lo ideal es que el HTML del select ya esté definido o lo pasemos como plantilla.
-    // Por ahora, usaremos una solución estándar.
-    
-    nuevaFila.innerHTML = `
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
         <td>
-            <select name="cuentas[]" class="form-select cuenta-select" required>
+            <select name="cuentas[]" class="form-select select-cuenta" required>
                 <option value="">Cargando cuentas...</option>
             </select>
         </td>
-        <td><input type="number" step="0.01" name="debe[]" class="form-control input-monto" value="0.00" oninput="validarAsiento()"></td>
-        <td><input type="number" step="0.01" name="haber[]" class="form-control input-monto" value="0.00" oninput="validarAsiento()"></td>
+        <td>
+            <input type="number" name="debe[]" class="form-control valor-debe" step="0.01" value="0.00" oninput="calcularTotales()">
+        </td>
+        <td>
+            <input type="number" name="haber[]" class="form-control valor-haber" step="0.01" value="0.00" oninput="calcularTotales()">
+        </td>
         <td class="text-center">
-            <button type="button" class="btn btn-link text-danger" onclick="eliminarFila(${filaCount})"><i class="fas fa-trash"></i></button>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminarFila(this)">
+                <i class="fas fa-times"></i>
+            </button>
         </td>
     `;
-    cuerpo.appendChild(nuevaFila);
-    actualizarOpcionesCuentas(nuevaFila.querySelector('.cuenta-select'));
+
+    cuerpo.appendChild(tr);
+
+    // Buscamos el select que acabamos de crear para llenarlo con las cuentas
+    const nuevoSelect = tr.querySelector('.select-cuenta');
+    actualizarOpcionesCuentas(nuevoSelect); // Esta función está en tu PHP de asientos_diario
+    calcularTotales();
 }
 
-function eliminarFila(id) {
-    document.getElementById(`fila_${id}`).remove();
-    validarAsiento();
-}
-
-function validarAsiento() {
-    let tDebe = 0;
-    let tHaber = 0;
-    
-    document.querySelectorAll('input[name="debe[]"]').forEach(input => tDebe += parseFloat(input.value || 0));
-    document.querySelectorAll('input[name="haber[]"]').forEach(input => tHaber += parseFloat(input.value || 0));
-
-    document.getElementById('totalDebe').innerText = tDebe.toFixed(2);
-    document.getElementById('totalHaber').innerText = tHaber.toFixed(2);
-
-    const btn = document.getElementById('btnGuardarAsiento');
-    const status = document.getElementById('statusCuadrado');
-
-    if (tDebe.toFixed(2) === tHaber.toFixed(2) && tDebe > 0) {
-        btn.disabled = false;
-        status.innerHTML = '<i class="fas fa-check-circle"></i> Asiento Cuadrado';
-        status.className = "me-auto text-success";
+function eliminarFila(boton) {
+    const fila = boton.closest('tr');
+    if (document.querySelectorAll('#cuerpoAsiento tr').length > 1) {
+        fila.remove();
+        calcularTotales();
     } else {
+        alert("El asiento debe tener al menos una línea.");
+    }
+}
+
+function calcularTotales() {
+    let totalDebe = 0;
+    let totalHaber = 0;
+
+    document.querySelectorAll('.valor-debe').forEach(input => {
+        totalDebe += parseFloat(input.value) || 0;
+    });
+
+    document.querySelectorAll('.valor-haber').forEach(input => {
+        totalHaber += parseFloat(input.value) || 0;
+    });
+
+    document.getElementById('totalDebe').innerText = totalDebe.toFixed(2);
+    document.getElementById('totalHaber').innerText = totalHaber.toFixed(2);
+
+    const status = document.getElementById('statusCuadrado');
+    const btn = document.getElementById('btnGuardarAsiento');
+
+    // Validación de cuadre contable (permitimos diferencia mínima de 0.01 por decimales)
+    if (Math.abs(totalDebe - totalHaber) < 0.01 && totalDebe > 0) {
+        status.innerText = "Asiento Cuadrado";
+        status.className = "me-auto text-success fw-bold";
+        btn.disabled = false;
+    } else {
+        status.innerText = "Asiento Descuadrado";
+        status.className = "me-auto text-danger fw-bold";
         btn.disabled = true;
-        status.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Asiento Descuadrado';
-        status.className = "me-auto text-danger";
     }
 }
