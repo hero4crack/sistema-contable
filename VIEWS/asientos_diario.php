@@ -198,5 +198,6 @@ $asientos = obtenerAsientos($conexion);
 
         window.onload = () => { agregarFila(); agregarFila(); };
     </script>
+    <?php include('script.php'); ?>
 </body>
 </html>

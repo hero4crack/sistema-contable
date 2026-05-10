@@ -107,16 +107,6 @@ $facturas = obtenerLibroFacturas($conexion);
         </main>
     </div>
 
-    <script>
-        const userMenu = document.getElementById('userMenu');
-        userMenu.addEventListener('click', function(e) {
-            e.stopPropagation();
-            this.classList.toggle('active');
-        });
-        window.onclick = function() {
-            userMenu.classList.remove('active');
-        }
-    </script>
 
     <div class="modal fade" id="modalRegistro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -173,28 +163,7 @@ $facturas = obtenerLibroFacturas($conexion);
             </div>
         </div>
     </div>
-     <script src="../JQUERY/jquery.js"></script>
-    <script src="../DATATABLE/datatables1.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#tabla').DataTable({
-                lengthMenu: [5, 10, 25, 50, 100],
-                pageLength: 25,
-                language: {
-                    //lengthMenu: "Mostrar MENU registros por pagina",
-                    zeroRecords: "Sin resultado - disculpa",
-                    //info: "Mostrando la pagina PAGE de PAGES",
-                    infoEmpty: "No records available",
-                    infoFiltered: "(filtrado de  MAX registros totales)",
-                    search: "Buscar: ",
-                    paginate: {
-                        next: "Siguientes",
-                        previous: "Anterior"
-                    },
-                }
-            });
-        });
-    </script>
+    
 
     <script>
         function calcularIvaModal() {
@@ -203,7 +172,7 @@ $facturas = obtenerLibroFacturas($conexion);
             document.getElementById('iva_modal').value = iva.toFixed(2);
         }
     </script>
-
+ <?php include('script.php'); ?>
 </body>
 
 </html>

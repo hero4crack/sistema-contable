@@ -79,5 +79,6 @@ $total_gastos = 0;
             </section>
         </main>
     </div>
+    <?php include('script.php'); ?>
 </body>
 </html>

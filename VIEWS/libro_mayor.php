@@ -110,5 +110,6 @@ $saldos = obtenerLibroMayor($conexion);
         });
     });
     </script>
+    <?php include('script.php'); ?>
 </body>
 </html>
