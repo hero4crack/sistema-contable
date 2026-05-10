@@ -36,15 +36,6 @@
         </main>
     </div>
 
-    <script>
-        const userMenu = document.getElementById('userMenu');
-        userMenu.addEventListener('click', function(e) {
-            e.stopPropagation();
-            this.classList.toggle('active');
-        });
-        window.onclick = function() {
-            userMenu.classList.remove('active');
-        }
-    </script>
+<?php include('script.php'); ?>
 </body>
 </html>
