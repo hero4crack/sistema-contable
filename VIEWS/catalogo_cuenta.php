@@ -31,7 +31,7 @@ $datos_catalogo = obtenerCatalogo($conexion);
                 <a href="../VIEWS/estado_resultados.php"><i class="fas fa-file-invoice-dollar"></i> Estado de Resultados</a>
                 <a href="../VIEWS/empleados.php"><i class="fas fa-users"></i> Empleados</a>
                 <a href="../VIEWS/catalogo_cuenta.php" class="active"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
-                <a href="#"><i class="fas fa-shield-alt"></i> Auditoría</a>
+                <a href="../VIEWS/auditoria.php"><i class="fas fa-shield-alt"></i> Auditoría</a>
                 </nav>
             </aside>
                 <main class="viewport">
