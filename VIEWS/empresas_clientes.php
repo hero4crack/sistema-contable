@@ -147,7 +147,7 @@
                         </div>
                     </div>
 
-                    <?php 
+                    <?php
                     $sql = "SELECT * FROM empresas_clientes";
                     $result = $conexion->query($sql);
                     if ($result->num_rows > 0) {
@@ -259,10 +259,18 @@
                                                                                 <option value="FORMAL" <?php echo ($row['tipo_contribuyente'] == 'FORMAL') ? 'selected' : ''; ?>>Formal</option>
                                                                             </select>
                                                                         </div>
-                                                                        <div class="col-md-12 mb-2">
+                                                                        <div class="col-md-7 mb-2">
                                                                             <label class="form-label small fw-bold">Dirección Fiscal</label>
                                                                             <input class="form-control" type="text" name="direccion" value="<?php echo $row['direccion_fiscal'] ?>" required>
                                                                         </div>
+                                                                        <div class="col-md-4 mb-2">
+                                                                            <label class="form-label small fw-bold" for="estado">Estado:</label>
+                                                                            <select class="form-select" id="estado" name="estado" required>
+                                                                                <option value="1">Activo</option>
+                                                                                <option value="0">Inactivo</option>
+                                                                            </select>
+                                                                        </div>
+
                                                                     </div>
                                                                     <div class="seccion-titulo mt-3">DATOS DEL RESPONSABLE</div>
                                                                     <div class="row g-2">
@@ -297,11 +305,11 @@
                                 </tbody>
                             </table>
                         </div>
-                    <?php 
+                    <?php
                     } else {
                         echo "<div class='p-5 text-center'>No hay empresas registradas aún.</div>";
                     }
-                    $conexion->close(); 
+                    $conexion->close();
                     ?>
                 </div>
             </section>
@@ -317,20 +325,20 @@
                 lengthMenu: [5, 10, 25, 50],
                 pageLength: 10,
                 language: {
-                    "sProcessing":     "Procesando...",
-                    "sLengthMenu":     "Mostrar _MENU_ registros",
-                    "sZeroRecords":    "No se encontraron resultados",
-                    "sEmptyTable":     "Ningún dato disponible en esta tabla",
-                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
-                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-                    "sSearch":         "Buscar:",
-                    "sInfoThousands":  ",",
+                    "sProcessing": "Procesando...",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sSearch": "Buscar:",
+                    "sInfoThousands": ",",
                     "sLoadingRecords": "Cargando...",
                     "oPaginate": {
-                        "sFirst":    "Primero",
-                        "sLast":     "Último",
-                        "sNext":     "Siguiente",
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
                         "sPrevious": "Anterior"
                     }
                 }
@@ -338,4 +346,5 @@
         });
     </script>
 </body>
+
 </html>
