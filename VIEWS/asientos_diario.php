@@ -24,6 +24,7 @@ $asientos = obtenerAsientos($conexion);
                 <a href="../VIEWS/asientos_diario.php" class="active"><i class="fas fa-book"></i> Asientos Diario</a>
                 <a href="../VIEWS/libro_mayor.php"><i class="fas fa-chart-line"></i> Libro Mayor</a>
                 <a href="../VIEWS/balance_comprobacion.php"><i class="fas fa-balance-scale"></i> Balance</a>
+                <a href="../VIEWS/estado_resultados.php"><i class="fas fa-file-invoice-dollar"></i> Estado de Resultados</a>
                 <a href="../VIEWS/empleados.php"><i class="fas fa-users"></i> Empleados</a>
                 <a href="../VIEWS/catalogo_cuenta.php"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
                 <a href="#"><i class="fas fa-shield-alt"></i> Auditoría</a>
