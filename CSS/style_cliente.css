@@ -16,7 +16,7 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-mai
 .app-container { display: flex; height: 100vh; }
 
 /* Sidebar */
-.main-sidebar { position:fixed; top:0; left:0; height:100vh; /* this will make it go ontop of other content, 
+.main-sidebar { position:fixed; top:0; left:0; height:100vh;  /* this will make it go ontop of other content, 
   the index is the "layer" its on so make it as low as you can. */ z-index: 99; max-width: 17%; background: var(--sidebar-color); color: white; padding-top: 20px; height: 100vh; }
 
   
@@ -212,4 +212,9 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-mai
 
 .menu-plegable .logout-link:hover i {
     color: #ef4444;
+}
+
+.mi-imagen{
+    width: 100%;
+    margin-bottom: 10px;
 }
