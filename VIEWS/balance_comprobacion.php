@@ -20,21 +20,7 @@ $totalSaldoAcreedor = 0;
 </head>
 <body>
     <div class="app-container">
-        <aside class="main-sidebar">
-            <div class="brand">CONTABLE EA</div>
-            <nav class="menu">
-    <a href="../VIEWS/inicio.php"><i class="fas fa-home"></i>Inicio</a>
-                <a href="../VIEWS/empresas_clientes.php"><i class="fas fa-city"></i> Empresas Clientes</a>
-                <a href="../VIEWS/libro_facturas.php"><i class="fas fa-file-invoice""></i> Libro de Facturas</a>
-                <a href="../VIEWS/asientos_diario.php"><i class="fas fa-book"></i> Asientos Diario</a>
-                <a href="../VIEWS/libro_mayor.php"><i class="fas fa-chart-line"></i> Libro Mayor</a>
-                <a href="../VIEWS/balance_comprobacion.php" class="active"><i class="fas fa-balance-scale"></i> Balance</a>
-                <a href="../VIEWS/estado_resultados.php"><i class="fas fa-file-invoice-dollar"></i> Estado de Resultados</a>
-                <a href="../VIEWS/empleados.php"><i class="fas fa-users"></i> Empleados</a>
-                <a href="../VIEWS/catalogo_cuenta.php"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
-                <a href="../VIEWS/auditoria.php"><i class="fas fa-shield-alt"></i> Auditoría</a>
-            </nav>
-        </aside>
+        <?php include('sidebar.php'); ?>
 
         <main class="viewport">
             <?php include('header.php'); ?>

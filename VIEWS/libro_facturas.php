@@ -31,8 +31,10 @@ $facturas = obtenerLibroFacturas($conexion);
     </div>
 <?php endif; ?>
     <div class="app-container">
+
+        
         <aside class="main-sidebar">
-            <div class="brand"><i class="fas fa-calculator"></i> CONTABLE EA</div>
+            <div class="brand"><img src="../IMG/logo_empresa-sinfondo.png" alt="#" class="mi-imagen"></div>
             <nav class="menu">
                 <a href="../VIEWS/inicio.php"><i class="fas fa-home"></i> Inicio</a>
                 <a href="../VIEWS/empresas_clientes.php"><i class="fas fa-city"></i> Empresas Clientes</a>
