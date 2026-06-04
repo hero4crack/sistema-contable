@@ -1,43 +1,55 @@
 <?php
+// BACKEND/guardar_factura.php
 require_once 'conecxion_bd.php';
 
-// 2. Verificamos que los datos vengan por el método POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // Capturamos los datos del formulario (Modal)
-    $id_empresa    = $_POST['id_empresa'];
-    $nro_factura   = $_POST['nro_factura'];
-    $nro_control   = $_POST['nro_control'];
-    $base_imponible = $_POST['base_imponible'];
-    $monto_exento  = $_POST['monto_exento'];
+    // Sanitizar y capturar campos comunes
+    $tipo_transaccion = $conexion->real_escape_string($_POST['tipo_transaccion']);
+    $nro_factura      = $conexion->real_escape_string($_POST['nro_factura']);
+    $nro_control      = $conexion->real_escape_string($_POST['nro_control']);
+    $base_imponible   = floatval($_POST['base_imponible']);
+    $monto_exento     = floatval($_POST['monto_exento']);
     
-    // Realizamos los cálculos de ingeniería en el servidor (por seguridad)
-    $alicuota = 16.00; // 16% estándar
+    // Inicializar variables de relación en la BD
+    $id_empresa = "NULL";
+    $id_tercero = "NULL";
+
+    // Evaluar la lógica según lo que dictó el contador
+    if ($tipo_transaccion === 'COMPRA') {
+        // Si es compra, el tercero es el proveedor
+        $id_tercero = intval($_POST['id_proveedor']);
+    } else {
+        // Si es venta, se asocia a la empresa cliente
+        $id_empresa = intval($_POST['id_empresa']);
+    }
+    
+    // Cálculos de ingeniería fiscal en el servidor
+    $alicuota = 16.00; // 16% estándar de IVA
     $monto_iva = $base_imponible * ($alicuota / 100);
     $total_factura = $base_imponible + $monto_exento + $monto_iva;
     
-    // Definimos una fecha por defecto (hoy) o puedes capturarla del formulario
     $fecha_registro = date("Y-m-d");
 
-    // 3. Preparamos la consulta SQL de inserción
-    // Asegúrate de que los nombres de las columnas coincidan con tu tabla 'facturas'
-    $sql = "INSERT INTO facturas (id_empresa, nro_factura, nro_control, fecha_documento, 
-                                  base_imponible, monto_exento, alicuota_iva, monto_iva, total_factura) 
-            VALUES ('$id_empresa', '$nro_factura', '$nro_control', '$fecha_registro', 
+    // Preparamos la consulta SQL incluyendo tipo_transaccion e id_tercero
+    $sql = "INSERT INTO facturas (id_empresa, id_tercero, tipo_transaccion, nro_factura, nro_control, 
+                                  fecha_documento, base_imponible, monto_exento, alicuota_iva, monto_iva, total_factura) 
+            VALUES (" . ($id_empresa !== "NULL" ? "'$id_empresa'" : "NULL") . ", 
+                    " . ($id_tercero !== "NULL" ? "'$id_tercero'" : "NULL") . ", 
+                    '$tipo_transaccion', '$nro_factura', '$nro_control', '$fecha_registro', 
                     '$base_imponible', '$monto_exento', '$alicuota', '$monto_iva', '$total_factura')";
 
-    // 4. Ejecutamos la consulta
+    // Ejecutamos la consulta
     if ($conexion->query($sql) === TRUE) {
-        // Si todo sale bien, redirigimos de vuelta al libro con un mensaje de éxito
         header("Location: ../VIEWS/libro_facturas.php?status=success");
+        exit();
     } else {
-        // Si hay un error, lo mostramos
-        echo "Error al registrar: " . $conexion->error;
+        echo "Error crítico al registrar en el libro fiscal: " . $conexion->error;
     }
 
 } else {
-    // Si alguien intenta entrar al archivo sin enviar el formulario
     header("Location: ../VIEWS/libro_facturas.php");
+    exit();
 }
 
 $conexion->close();
