@@ -8,6 +8,7 @@ $saldos = obtenerLibroMayor($conexion);
 <head>
     <meta charset="UTF-8">
     <title>Libro Mayor | Contable EA</title>
+    <link rel="stylesheet" href="../DATATABLE/datatables1.css">
     <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">

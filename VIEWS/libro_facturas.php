@@ -169,8 +169,8 @@ $meses = [
                     
                     <!-- ================= TABLA DE VENTAS ================= -->
                     <div id="contenedorVentas" class="table-wrapper">
-                        <table id='tabla2' class="contable-table w-100">
-                            <thead>
+                        <table id='tabla2' class="table table-hover table-bordered shadow-sm">
+                                    <thead class="table-dark">
                                 <tr>
                                     <th style="width: 70px;">ID</th>
                                     <th>Fecha</th>
@@ -238,8 +238,8 @@ $meses = [
 
                     <!-- ================= TABLA DE COMPRAS ================= -->
                     <div id="contenedorCompras" class="table-wrapper d-none">
-                        <table id='tabla' class="contable-table w-100">
-                            <thead>
+                        <table id='tabla' class="table table-hover table-bordered shadow-sm">
+                                    <thead class="table-dark">
                                 <tr>
                                     <th style="width: 70px;">ID</th>
                                     <th>Fecha</th>
