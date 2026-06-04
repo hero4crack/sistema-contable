@@ -105,6 +105,7 @@ if (isset($facturas) && !empty($facturas)) {
                         <table id='tabla2' class="contable-table w-100">
                             <thead>
                                 <tr>
+                                    <th>id de factura</th>
                                     <th>Fecha</th>
                                     <th>Nro. Factura / Control</th>
                                     <th>Cliente</th>
@@ -119,6 +120,7 @@ if (isset($facturas) && !empty($facturas)) {
                                 <?php if (!empty($ventas)): ?>
                                     <?php foreach ($ventas as $v): ?>
                                         <tr>
+                                            <td><?php echo htmlspecialchars($v['id_factura']); ?></td>
                                             <td><?php echo date("d/m/Y", strtotime($v['fecha_documento'])); ?></td>
                                             <td>
                                                 <span style="display:block; font-weight: bold;"><?php echo $v['nro_factura']; ?></span>
@@ -148,6 +150,7 @@ if (isset($facturas) && !empty($facturas)) {
                         <table id='tabla' class="contable-table w-100">
                             <thead>
                                 <tr>
+                                    <th>id de factura</th>
                                     <th>Fecha</th>
                                     <th>Nro. Factura / Control</th>
                                     <th>Proveedor</th>
@@ -162,6 +165,8 @@ if (isset($facturas) && !empty($facturas)) {
                                 <?php if (!empty($compras)): ?>
                                     <?php foreach ($compras as $c): ?>
                                         <tr>
+                                            
+                                            <td><?php echo htmlspecialchars($c['id_factura']); ?></td>
                                             <td><?php echo date("d/m/Y", strtotime($c['fecha_documento'])); ?></td>
                                             <td>
                                                 <span style="display:block; font-weight: bold;"><?php echo $c['nro_factura']; ?></span>
