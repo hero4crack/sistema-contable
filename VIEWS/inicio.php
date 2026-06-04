@@ -14,7 +14,7 @@
         <aside class="main-sidebar">
             <div class="brand"><img src="../IMG/logo_empresa-sinfondo.png" alt="#" class="mi-imagen"></div>
             <nav class="menu">
-                <a href="../VIEWS/inicio.php class="active"><i class="fas fa-home"></i> Inicio</a>
+                <a href="../VIEWS/inicio.php" class="active"><i class="fas fa-home"></i> Inicio</a>
                 <a href="../VIEWS/empresas_clientes.php"><i class="fas fa-city"></i> Empresas Clientes</a>
                 <a href="../VIEWS/registro_proveedor.php"><i class="fas fa-truck"></i> Proveedores</a>
                 <a href="../VIEWS/libro_facturas.php""><i class="fas fa-file-invoice"></i> Libro de Facturas</a>
