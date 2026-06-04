@@ -63,7 +63,7 @@ $proveedores = obtenerListaProveedores($conexion);
                     </div>
                     
                     <div class="table-wrapper p-3">
-                        <table id="tabla" class="contable-table">
+                        <table id="tabla" class="table table-hover table-bordered shadow-sm">
                             <thead>
                                 <tr>
                                     <th>RIF</th>
