@@ -63,8 +63,8 @@ $proveedores = obtenerListaProveedores($conexion);
                     </div>
                     
                     <div class="table-wrapper p-3">
-                        <table id="tabla" class="contable-table">
-                            <thead>
+                        <table id="tabla" class="table table-hover table-bordered shadow-sm ">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>RIF</th>
                                     <th>Razón Social / Nombre Comercial</th>
