@@ -19,6 +19,7 @@ if ($cuentas_catalogo && $cuentas_catalogo->num_rows > 0) {
 <head>
     <meta charset="UTF-8">
     <title>Asientos Diario | Contable EA</title>
+    <link rel="stylesheet" href="../DATATABLE/datatables1.css">
     <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_cliente.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -61,7 +62,7 @@ if ($cuentas_catalogo && $cuentas_catalogo->num_rows > 0) {
                         </button>
                     </div>
                     <div class="table-wrapper p-3">
-                        <table class="table table-hover align-middle">
+                        <table id="tabla" class="table table-hover align-middle">
                             <thead class="table-dark">
     <tr>
         <th style="width: 7%;">ID</th> <th>Fecha</th>
