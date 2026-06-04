@@ -21,7 +21,7 @@ $facturas = obtenerLibroFacturas($conexion);
 <body>
     <?php if(isset($_GET['status']) && $_GET['status'] == 'success'): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 20px;">
-        <strong>¡Excelente!</strong> La factura ha sido registrada correctamente en el libro.
+        <strong>¡Excelente!</strong> El movimiento ha sido procesado correctamente en el libro fiscal.
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     <?php endif; ?>
@@ -51,7 +51,7 @@ $facturas = obtenerLibroFacturas($conexion);
             <section class="content">
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
-                        <button class="primary-btn" style="background: #10b981;" data-bs-toggle="modal" data-bs-target="#modalRegistro">
+                        <button class="primary-btn" style="background: #10b981;" data-bs-toggle="modal" data-bs-target="#modalRegistro" onclick="limpiarFormularioNuevaFactura()">
                             <i class="fas fa-plus-circle"></i> REGISTRAR NUEVA FACTURA
                         </button>
                     </div>
@@ -95,8 +95,8 @@ $facturas = obtenerLibroFacturas($conexion);
                                             <td><?php echo number_format($f['monto_iva'], 2); ?> Bs. <small>(<?php echo $f['alicuota_iva']; ?>%)</small></td>
                                             <td style="font-weight: 800; color: #1e293b;"><?php echo number_format($f['total_factura'], 2); ?> Bs.</td>
                                             <td>
-                                                <button class="config-btn" title="Ver Detalle"><i class="fas fa-eye"></i></button>
-                                                <a href="../BACKEND/eliminar_facturas.php?id_factura=<?php echo $f['id_factura'] ?>" class="btn btn-danger fs-6 text-white p-1"> <i class="fa-solid fa-trash"></i></a>
+                                                <button class="config-btn text-warning" title="Editar Factura" onclick="editarFactura(<?php echo $f['id_factura']; ?>)" style="background: transparent; border: none; margin-right: 5px;"><i class="fas fa-edit"></i></button>
+                                                <a href="../BACKEND/eliminar_facturas.php?id_factura=<?php echo $f['id_factura'] ?>" class="btn btn-danger fs-6 text-white p-1" style="width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; padding: 0 !important;"> <i class="fa-solid fa-trash" style="font-size: 0.85rem;"></i></a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -117,25 +117,32 @@ $facturas = obtenerLibroFacturas($conexion);
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
                 <div class="modal-header" style="background: #1e293b; color: white; border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title"><i class="fas fa-file-invoice"></i> Nueva Factura Fiscal</h5>
+                    <h5 class="modal-title" id="tituloModal"><i class="fas fa-file-invoice me-2"></i> Nueva Factura Fiscal</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="../BACKEND/guardar_factura.php" method="POST">
+                <form action="../BACKEND/guardar_factura.php" method="POST" id="formFactura">
+                    <input type="hidden" name="id_factura" id="edit_id_factura" value="">
+                    
                     <div class="modal-body" style="padding: 30px;">
                         <div class="row g-3">
                             
                             <div class="col-md-4 mb-2">
-                                <label class="form-label fw-bold">Tipo de Movimiento</label>
-                                <select name="tipo_transaccion" id="tipo_transaccion" class="form-select border-primary" onchange="alternarTerceros()" required>
-                                    <option value="VENTA">Venta (Alimenta Libro Ventas)</option>
-                                    <option value="COMPRA">Compra (Alimenta Libro Compras)</option>
+                                <label class="form-label fw-bold text-secondary">Fecha de Emisión</label>
+                                <input type="date" name="fecha_documento" id="fecha_documento" class="form-control border-primary" required value="<?php echo date('Y-m-d'); ?>">
+                            </div>
+
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label fw-bold text-secondary">Tipo de Movimiento</label>
+                                <select name="tipo_transaccion" id="tipo_transaccion" class="form-select border-primary fw-semibold" onchange="alternarTerceros()" required>
+                                    <option value="VENTA">Venta (Libro Ventas)</option>
+                                    <option value="COMPRA">Compra (Libro Compras)</option>
                                 </select>
                             </div>
 
-                            <div class="col-md-8 mb-2" id="grupo_cliente">
-                                <label class="form-label fw-bold">Empresa Cliente</label>
-                                <select name="id_empresa" id="id_empresa" class="form-select">
-                                    <option value="">Seleccione la empresa...</option>
+                            <div class="col-md-4 mb-2" id="grupo_cliente">
+                                <label class="form-label fw-bold text-success"><i class="fas fa-city me-1"></i> Empresa Cliente</label>
+                                <select name="id_empresa" id="id_empresa" class="form-select border-success">
+                                    <option value="">Seleccione...</option>
                                     <?php
                                     $empresas = obtenerEmpresasParaFactura($conexion);
                                     while ($emp = $empresas->fetch_assoc()):
@@ -145,12 +152,11 @@ $facturas = obtenerLibroFacturas($conexion);
                                 </select>
                             </div>
 
-                            <div class="col-md-8 mb-2 d-none" id="grupo_proveedor">
-                                <label class="form-label fw-bold">Proveedor</label>
-                                <select name="id_proveedor" id="id_proveedor" class="form-select">
-                                    <option value="">Seleccione el proveedor...</option>
+                            <div class="col-md-4 mb-2 d-none" id="grupo_proveedor">
+                                <label class="form-label fw-bold text-warning"><i class="fas fa-truck me-1"></i> Proveedor</label>
+                                <select name="id_proveedor" id="id_proveedor" class="form-select border-warning">
+                                    <option value="">Seleccione...</option>
                                     <?php
-                                    // Consulta directa para simplificar el flujo de proveedores
                                     $provQuery = $conexion->query("SELECT id_proveedor, razon_social FROM proveedores WHERE estado_activo = 1");
                                     while ($prov = $provQuery->fetch_assoc()):
                                     ?>
@@ -160,31 +166,47 @@ $facturas = obtenerLibroFacturas($conexion);
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">Nro. Factura</label>
-                                <input type="text" name="nro_factura" class="form-control" placeholder="0001" required>
+                                <label class="form-label fw-semibold">Nro. Factura</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-hashtag text-muted"></i></span>
+                                    <input type="text" name="nro_factura" id="nro_factura" class="form-control" placeholder="Ej: 00234" required>
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Nro. Control</label>
-                                <input type="text" name="nro_control" class="form-control" placeholder="00-001" required>
+                                <label class="form-label fw-semibold">Nro. Control</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-shield-alt text-muted"></i></span>
+                                    <input type="text" name="nro_control" id="nro_control" class="form-control" placeholder="Ej: 00-00234" required>
+                                </div>
                             </div>
 
-                            <div class="col-md-4 mt-4">
-                                <label class="form-label">Base Imponible (Bs.)</label>
-                                <input type="number" step="0.01" name="base_imponible" id="base_modal" class="form-control" oninput="calcularIvaModal()" required>
+                            <hr class="text-muted my-4">
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-dark">Base Imponible (Bs.)</label>
+                                <input type="number" step="0.01" min="0" name="base_imponible" id="base_modal" class="form-control fw-bold border-dark" oninput="calcularTotalesModal()" required placeholder="0.00">
                             </div>
-                            <div class="col-md-4 mt-4">
-                                <label class="form-label">Monto Exento (Bs.)</label>
-                                <input type="number" step="0.01" name="monto_exento" id="exento_modal" class="form-control" oninput="calcularIvaModal()" value="0.00">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold text-secondary">Monto Exento (Bs.)</label>
+                                <input type="number" step="0.01" min="0" name="monto_exento" id="exento_modal" class="form-control text-secondary" oninput="calcularTotalesModal()" value="0.00">
                             </div>
-                            <div class="col-md-4 mt-4">
-                                <label class="form-label">IVA (16%)</label>
-                                <input type="text" name="monto_iva" id="iva_modal" class="form-control" readonly style="background: #f8fafc;">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold text-danger">IVA (16% Bs.)</label>
+                                <input type="text" name="monto_iva" id="iva_modal" class="form-control text-danger fw-bold" readonly style="background: #fff5f5; border-color: #feb2b2;" value="0.00">
                             </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-primary">Total Factura (Bs.)</label>
+                                <input type="hidden" name="total_factura" id="total_modal_hidden" value="0.00">
+                                <input type="text" id="iva_total_visual" class="form-control bg-primary-subtle text-primary fw-bolder fs-5 border-primary" readonly value="0.00">
+                            </div>
+
                         </div>
                     </div>
                     <div class="modal-footer" style="background: #f8fafc; border-radius: 0 0 15px 15px;">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success" style="background: #10b981; border: none; padding: 10px 25px;">Guardar Factura</button>
+                        <button type="submit" id="btnSubmitModal" class="btn btn-success" style="background: #10b981; border: none; padding: 10px 25px; font-weight: bold;">
+                            <i class="fas fa-save me-1"></i> Procesar Factura
+                        </button>
                     </div>
                 </form>
             </div>
@@ -192,13 +214,17 @@ $facturas = obtenerLibroFacturas($conexion);
     </div>
 
     <script>
-        function calcularIvaModal() {
+        function calcularTotalesModal() {
             const base = parseFloat(document.getElementById('base_modal').value) || 0;
+            const exento = parseFloat(document.getElementById('exento_modal').value) || 0;
             const iva = base * 0.16;
+            const total = base + exento + iva;
+            
             document.getElementById('iva_modal').value = iva.toFixed(2);
+            document.getElementById('total_modal_hidden').value = total.toFixed(2);
+            document.getElementById('iva_total_visual').value = total.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " Bs.";
         }
 
-        // Función JS para alternar campos entre Clientes y Proveedores según la transacción
         function alternarTerceros() {
             const tipo = document.getElementById('tipo_transaccion').value;
             const grupoCliente = document.getElementById('grupo_cliente');
@@ -210,17 +236,94 @@ $facturas = obtenerLibroFacturas($conexion);
                 grupoCliente.classList.add('d-none');
                 grupoProveedor.classList.remove('d-none');
                 selectCliente.required = false;
-                selectCliente.value = "";
                 selectProveedor.required = true;
             } else {
                 grupoProveedor.classList.add('d-none');
                 grupoCliente.classList.remove('d-none');
                 selectProveedor.required = false;
-                selectProveedor.value = "";
                 selectCliente.required = true;
             }
+        }
+
+        // Restablece el modal a su estado original de inserción limpia
+        function limpiarFormularioNuevaFactura() {
+            document.getElementById('formFactura').action = "../BACKEND/guardar_factura.php";
+            document.getElementById('tituloModal').innerHTML = '<i class="fas fa-file-invoice me-2"></i> Nueva Factura Fiscal';
+            document.getElementById('edit_id_factura').value = "";
+            document.getElementById('fecha_documento').value = "<?php echo date('Y-m-d'); ?>";
+            document.getElementById('tipo_transaccion').value = "VENTA";
+            document.getElementById('nro_factura').value = "";
+            document.getElementById('nro_control').value = "";
+            document.getElementById('base_modal').value = "";
+            document.getElementById('exento_modal').value = "0.00";
+            document.getElementById('id_empresa').value = "";
+            document.getElementById('id_proveedor').value = "";
+            
+            const btn = document.getElementById('btnSubmitModal');
+            btn.className = "btn btn-success";
+            btn.style.background = "#10b981";
+            btn.innerHTML = '<i class="fas fa-save me-1"></i> Procesar Factura';
+            
+            alternarTerceros();
+            calcularTotalesModal();
+        }
+
+        // LÓGICA ASÍNCRONA: LLENAR FORMULARIO PARA EDICIÓN
+        function editarFactura(id) {
+            fetch(`../BACKEND/obtener_factura_json.php?id=${id}`)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        const f = res.data;
+                        
+                        // 1. Redireccionar formulario a modificar
+                        document.getElementById('formFactura').action = "../BACKEND/modificar_factura.php";
+                        document.getElementById('tituloModal').innerHTML = '<i class="fas fa-edit me-2"></i> Modificar Factura Fiscal';
+                        
+                        // 2. Rellenar campos comunes
+                        document.getElementById('edit_id_factura').value = f.id_factura;
+                        document.getElementById('fecha_documento').value = f.fecha_documento;
+                        document.getElementById('tipo_transaccion').value = f.tipo_transaccion;
+                        document.getElementById('nro_factura').value = f.nro_factura;
+                        document.getElementById('nro_control').value = f.nro_control;
+                        document.getElementById('base_modal').value = f.base_imponible;
+
+                        // 3. Ajustar selectores de terceros y montos exentos
+                        alternarTerceros();
+                        
+                        if (f.tipo_transaccion === 'COMPRA') {
+                            document.getElementById('id_proveedor').value = f.id_tercero;
+                            document.getElementById('id_empresa').value = "";
+                            // Como en compras guardas la retención en monto_exento, reflejamos el exento original en 0.00 para la edición estándar
+                            document.getElementById('exento_modal').value = "0.00";
+                        } else {
+                            document.getElementById('id_empresa').value = f.id_empresa;
+                            document.getElementById('id_proveedor').value = "";
+                            document.getElementById('exento_modal').value = f.monto_exento;
+                        }
+                        
+                        // 4. Forzar cálculos y estilos visuales de botón de actualización
+                        calcularTotalesModal();
+                        
+                        const btn = document.getElementById('btnSubmitModal');
+                        btn.className = "btn btn-warning text-white";
+                        btn.style.background = "#f59e0b";
+                        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Actualizar Factura';
+
+                        // 5. Mostrar Modal
+                        const modal = new bootstrap.Modal(document.getElementById('modalRegistro'));
+                        modal.show();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error en AJAX:", error);
+                    alert("No se pudieron extraer los datos del documento fiscal.");
+                });
         }
     </script>
     <?php include('script.php'); ?>
 </body>
+
 </html>

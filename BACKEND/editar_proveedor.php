@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 razon_social = '$razon_social', 
                 nombre_comercial = '$nombre_comercial', 
                 tipo_contribuyente = '$tipo_contribuyente', 
-                porcentaje_retencion = $porcentaje_retencion, 
+                porcentaje_retencion ='$porcentaje_retencion', 
                 direccion_fiscal = '$direccion_fiscal', 
                 telefono = '$telefono', 
                 correo_electronico = '$correo_electronico', 
