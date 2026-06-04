@@ -3,6 +3,20 @@ require_once '../BACKEND/conecxion_bd.php';
 require_once '../BACKEND/consulta_factura.php';
 
 $facturas = obtenerLibroFacturas($conexion);
+
+// Separamos los arrays en el servidor para alimentar cada pestaña de forma limpia
+$ventas = [];
+$compras = [];
+
+if (isset($facturas) && !empty($facturas)) {
+    foreach ($facturas as $f) {
+        if ($f['tipo_transaccion'] === 'VENTA') {
+            $ventas[] = $f;
+        } else {
+            $compras[] = $f;
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -16,6 +30,26 @@ $facturas = obtenerLibroFacturas($conexion);
     <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="../JAVASCRIPT/bootstrap.bundle.min.js"></script>
+    <style>
+        /* Estilos estéticos para nuestras pestañas fiscales */
+        .tab-btn {
+            padding: 10px 20px;
+            font-weight: bold;
+            border: none;
+            background: #e2e8f0;
+            color: #475569;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active-tab {
+            background: #1e293b;
+            color: white;
+        }
+        .tab-btn:hover:not(.active-tab) {
+            background: #cbd5e1;
+        }
+    </style>
 </head>
 
 <body>
@@ -49,65 +83,115 @@ $facturas = obtenerLibroFacturas($conexion);
             <?php include('header.php') ?>
 
             <section class="content">
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
-                        <button class="primary-btn" style="background: #10b981;" data-bs-toggle="modal" data-bs-target="#modalRegistro" onclick="limpiarFormularioNuevaFactura()">
-                            <i class="fas fa-plus-circle"></i> REGISTRAR NUEVA FACTURA
+                <div class="d-flex justify-content-between align-items-end px-2">
+                    <div>
+                        <button id="btnTabVentas" class="tab-btn active-tab" onclick="cambiarLibro('VENTAS')">
+                            <i class="fas fa-arrow-up text-success me-1"></i> LIBRO DE VENTAS (Débito Fiscal)
+                        </button>
+                        <button id="btnTabCompras" class="tab-btn" onclick="cambiarLibro('COMPRAS')">
+                            <i class="fas fa-arrow-down text-warning me-1"></i> LIBRO DE COMPRAS (Crédito Fiscal)
                         </button>
                     </div>
+                    <div class="mb-2">
+                        <button class="primary-btn" style="background: #10b981; border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#modalRegistro" onclick="limpiarFormularioNuevaFactura()">
+                            <i class="fas fa-plus-circle"></i> REGISTRAR FACTURA
+                        </button>
+                    </div>
+                </div>
 
-                    <div class="table-wrapper">
-                        <table id='tabla' class="contable-table">
+                <div class="card" style="border-top-left-radius: 0px;">
+                    
+                    <div id="contenedorVentas" class="table-wrapper">
+                        <table id='tablaVentas' class="contable-table w-100">
                             <thead>
                                 <tr>
                                     <th>Fecha</th>
-                                    <th>Tipo</th>
                                     <th>Nro. Factura / Control</th>
-                                    <th>Cliente / Proveedor</th>
+                                    <th>Cliente</th>
                                     <th>Base Imponible</th>
                                     <th>Monto Exento</th>
-                                    <th>IVA (16%)</th>
+                                    <th>IVA Débito (16%)</th>
                                     <th>Total Factura</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class='table-group-divider'>
-                                <?php if (isset($facturas) && !empty($facturas)): ?>
-                                    <?php foreach ($facturas as $f): ?>
+                                <?php if (!empty($ventas)): ?>
+                                    <?php foreach ($ventas as $v): ?>
                                         <tr>
-                                            <td><?php echo date("d/m/Y", strtotime($f['fecha_documento'])); ?></td>
+                                            <td><?php echo date("d/m/Y", strtotime($v['fecha_documento'])); ?></td>
                                             <td>
-                                                <span class="badge <?php echo ($f['tipo_transaccion'] == 'VENTA') ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'; ?> p-1 fs-6">
-                                                    <?php echo $f['tipo_transaccion']; ?>
-                                                </span>
+                                                <span style="display:block; font-weight: bold;"><?php echo $v['nro_factura']; ?></span>
+                                                <small style="color: #64748b;">Ctrl: <?php echo $v['nro_control']; ?></small>
                                             </td>
+                                            <td><?php echo htmlspecialchars($v['nombre_empresa']); ?></td>
+                                            <td><?php echo number_format($v['base_imponible'], 2); ?> Bs.</td>
+                                            <td><?php echo number_format($v['monto_exento'], 2); ?> Bs.</td>
+                                            <td class="text-success fw-semibold">+<?php echo number_format($v['monto_iva'], 2); ?> Bs.</td>
+                                            <td style="font-weight: 800; color: #1e293b;"><?php echo number_format($v['total_factura'], 2); ?> Bs.</td>
                                             <td>
-                                                <span style="display:block; font-weight: bold;"><?php echo $f['nro_factura']; ?></span>
-                                                <small style="color: #64748b;">Ctrl: <?php echo $f['nro_control']; ?></small>
-                                            </td>
-                                            <td>
-                                                <?php 
-                                                    echo htmlspecialchars($f['tipo_transaccion'] == 'VENTA' ? $f['nombre_empresa'] : $f['nombre_proveedor']); 
-                                                ?>
-                                            </td>
-                                            <td><?php echo number_format($f['base_imponible'], 2); ?> Bs.</td>
-                                            <td><?php echo number_format($f['monto_exento'], 2); ?> Bs.</td>
-                                            <td><?php echo number_format($f['monto_iva'], 2); ?> Bs. <small>(<?php echo $f['alicuota_iva']; ?>%)</small></td>
-                                            <td style="font-weight: 800; color: #1e293b;"><?php echo number_format($f['total_factura'], 2); ?> Bs.</td>
-                                            <td>
-                                                <button class="config-btn text-warning" title="Editar Factura" onclick="editarFactura(<?php echo $f['id_factura']; ?>)" style="background: transparent; border: none; margin-right: 5px;"><i class="fas fa-edit"></i></button>
-                                                <a href="../BACKEND/eliminar_facturas.php?id_factura=<?php echo $f['id_factura'] ?>" class="btn btn-danger fs-6 text-white p-1" style="width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; padding: 0 !important;"> <i class="fa-solid fa-trash" style="font-size: 0.85rem;"></i></a>
+                                                <button class="config-btn text-warning" title="Editar Venta" onclick="editarFactura(<?php echo $v['id_factura']; ?>)" style="background: transparent; border: none; margin-right: 5px;"><i class="fas fa-edit"></i></button>
+                                                <a href="../BACKEND/eliminar_facturas.php?id_factura=<?php echo $v['id_factura'] ?>" class="btn btn-danger fs-6 text-white p-1" style="width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; padding: 0 !important;"> <i class="fa-solid fa-trash" style="font-size: 0.85rem;"></i></a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="9" style="text-align:center; padding: 20px; color: #94a3b8;">No hay facturas registradas en este periodo.</td>
+                                        <td colspan="8" style="text-align:center; padding: 20px; color: #94a3b8;">No hay operaciones de ventas registradas.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
+
+                    <div id="contenedorCompras" class="table-wrapper d-none">
+                        <table id='tablaCompras' class="contable-table w-100">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Nro. Factura / Control</th>
+                                    <th>Proveedor</th>
+                                    <th>Base Imponible</th>
+                                    <th>IVA Crédito (16%)</th>
+                                    <th>Retención IVA (Col. Exento)</th>
+                                    <th>Total Factura</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class='table-group-divider'>
+                                <?php if (!empty($compras)): ?>
+                                    <?php foreach ($compras as $c): ?>
+                                        <tr>
+                                            <td><?php echo date("d/m/Y", strtotime($c['fecha_documento'])); ?></td>
+                                            <td>
+                                                <span style="display:block; font-weight: bold;"><?php echo $c['nro_factura']; ?></span>
+                                                <small style="color: #64748b; display: block;">Ctrl: <?php echo $c['nro_control']; ?></small>
+                                                <?php if(!empty($c['nro_comprobante_retencion'])): ?>
+                                                    <small class="badge bg-primary-subtle text-primary p-1 mt-1" style="font-size: 0.75rem;">
+                                                        <i class="fas fa-receipt me-1"></i> Ret: <?php echo htmlspecialchars($c['nro_comprobante_retencion']); ?>
+                                                    </small>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td><?php echo htmlspecialchars($c['nombre_proveedor']); ?></td>
+                                            <td><?php echo number_format($c['base_imponible'], 2); ?> Bs.</td>
+                                            <td class="text-danger fw-semibold">+<?php echo number_format($c['monto_iva'], 2); ?> Bs.</td>
+                                            <td class="text-primary fw-bold" style="background: #f0fdf4;"><?php echo number_format($c['monto_exento'], 2); ?> Bs.</td>
+                                            <td style="font-weight: 800; color: #1e293b;"><?php echo number_format($c['total_factura'], 2); ?> Bs.</td>
+                                            <td>
+                                                <button class="config-btn text-warning" title="Editar Compra" onclick="editarFactura(<?php echo $c['id_factura']; ?>)" style="background: transparent; border: none; margin-right: 5px;"><i class="fas fa-edit"></i></button>
+                                                <a href="../BACKEND/eliminar_facturas.php?id_factura=<?php echo $c['id_factura'] ?>" class="btn btn-danger fs-6 text-white p-1" style="width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; padding: 0 !important;"> <i class="fa-solid fa-trash" style="font-size: 0.85rem;"></i></a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="8" style="text-align:center; padding: 20px; color: #94a3b8;">No hay operaciones de compras registradas.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </section>
         </main>
@@ -180,6 +264,15 @@ $facturas = obtenerLibroFacturas($conexion);
                                 </div>
                             </div>
 
+                            <div class="col-md-12 d-none" id="grupo_comprobante">
+                                <label class="form-label fw-bold text-primary"><i class="fas fa-receipt me-1"></i> Nro. Comprobante de Retención (SENIAT)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-file-signature text-muted"></i></span>
+                                    <input type="text" name="nro_comprobante_retencion" id="nro_comprobante_retencion" class="form-control border-primary" placeholder="Ej: 20260600000001">
+                                </div>
+                                <small class="text-muted">Formato exigido por el SENIAT: Año (4d) + Mes (2d) + Secuencia (8d).</small>
+                            </div>
+
                             <hr class="text-muted my-4">
 
                             <div class="col-md-3">
@@ -214,6 +307,26 @@ $facturas = obtenerLibroFacturas($conexion);
     </div>
 
     <script>
+        // FUNCIÓN: Alterna la visibilidad de los libros en caliente
+        function cambiarLibro(tipo) {
+            const tabVentas = document.getElementById('btnTabVentas');
+            const tabCompras = document.getElementById('btnTabCompras');
+            const contenedorVentas = document.getElementById('contenedorVentas');
+            const contenedorCompras = document.getElementById('contenedorCompras');
+
+            if (tipo === 'VENTAS') {
+                tabVentas.classList.add('active-tab');
+                tabCompras.classList.remove('active-tab');
+                contenedorVentas.classList.remove('d-none');
+                contenedorCompras.classList.add('d-none');
+            } else {
+                tabCompras.classList.add('active-tab');
+                tabVentas.classList.remove('active-tab');
+                contenedorCompras.classList.remove('d-none');
+                contenedorVentas.classList.add('d-none');
+            }
+        }
+
         function calcularTotalesModal() {
             const base = parseFloat(document.getElementById('base_modal').value) || 0;
             const exento = parseFloat(document.getElementById('exento_modal').value) || 0;
@@ -229,23 +342,27 @@ $facturas = obtenerLibroFacturas($conexion);
             const tipo = document.getElementById('tipo_transaccion').value;
             const grupoCliente = document.getElementById('grupo_cliente');
             const grupoProveedor = document.getElementById('grupo_proveedor');
+            const grupoComprobante = document.getElementById('grupo_comprobante');
             const selectCliente = document.getElementById('id_empresa');
             const selectProveedor = document.getElementById('id_proveedor');
+            const inputComprobante = document.getElementById('nro_comprobante_retencion');
 
             if (tipo === 'COMPRA') {
                 grupoCliente.classList.add('d-none');
                 grupoProveedor.classList.remove('d-none');
+                grupoComprobante.classList.remove('d-none');
                 selectCliente.required = false;
                 selectProveedor.required = true;
             } else {
                 grupoProveedor.classList.add('d-none');
                 grupoCliente.classList.remove('d-none');
+                grupoComprobante.classList.add('d-none');
                 selectProveedor.required = false;
                 selectCliente.required = true;
+                inputComprobante.value = ""; // Se limpia al pasar a Venta
             }
         }
 
-        // Restablece el modal a su estado original de inserción limpia
         function limpiarFormularioNuevaFactura() {
             document.getElementById('formFactura').action = "../BACKEND/guardar_factura.php";
             document.getElementById('tituloModal').innerHTML = '<i class="fas fa-file-invoice me-2"></i> Nueva Factura Fiscal';
@@ -254,6 +371,7 @@ $facturas = obtenerLibroFacturas($conexion);
             document.getElementById('tipo_transaccion').value = "VENTA";
             document.getElementById('nro_factura').value = "";
             document.getElementById('nro_control').value = "";
+            document.getElementById('nro_comprobante_retencion').value = "";
             document.getElementById('base_modal').value = "";
             document.getElementById('exento_modal').value = "0.00";
             document.getElementById('id_empresa').value = "";
@@ -268,7 +386,6 @@ $facturas = obtenerLibroFacturas($conexion);
             calcularTotalesModal();
         }
 
-        // LÓGICA ASÍNCRONA: LLENAR FORMULARIO PARA EDICIÓN
         function editarFactura(id) {
             fetch(`../BACKEND/obtener_factura_json.php?id=${id}`)
                 .then(response => response.json())
@@ -276,33 +393,31 @@ $facturas = obtenerLibroFacturas($conexion);
                     if (res.status === 'success') {
                         const f = res.data;
                         
-                        // 1. Redireccionar formulario a modificar
                         document.getElementById('formFactura').action = "../BACKEND/modificar_factura.php";
                         document.getElementById('tituloModal').innerHTML = '<i class="fas fa-edit me-2"></i> Modificar Factura Fiscal';
                         
-                        // 2. Rellenar campos comunes
                         document.getElementById('edit_id_factura').value = f.id_factura;
                         document.getElementById('fecha_documento').value = f.fecha_documento;
                         document.getElementById('tipo_transaccion').value = f.tipo_transaccion;
                         document.getElementById('nro_factura').value = f.nro_factura;
                         document.getElementById('nro_control').value = f.nro_control;
                         document.getElementById('base_modal').value = f.base_imponible;
+                        document.getElementById('nro_comprobante_retencion').value = f.nro_comprobante_retencion || "";
 
-                        // 3. Ajustar selectores de terceros y montos exentos
                         alternarTerceros();
                         
                         if (f.tipo_transaccion === 'COMPRA') {
                             document.getElementById('id_proveedor').value = f.id_tercero;
                             document.getElementById('id_empresa').value = "";
-                            // Como en compras guardas la retención en monto_exento, reflejamos el exento original en 0.00 para la edición estándar
                             document.getElementById('exento_modal').value = "0.00";
+                            cambiarLibro('COMPRAS');
                         } else {
                             document.getElementById('id_empresa').value = f.id_empresa;
                             document.getElementById('id_proveedor').value = "";
                             document.getElementById('exento_modal').value = f.monto_exento;
+                            cambiarLibro('VENTAS');
                         }
                         
-                        // 4. Forzar cálculos y estilos visuales de botón de actualización
                         calcularTotalesModal();
                         
                         const btn = document.getElementById('btnSubmitModal');
@@ -310,7 +425,6 @@ $facturas = obtenerLibroFacturas($conexion);
                         btn.style.background = "#f59e0b";
                         btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Actualizar Factura';
 
-                        // 5. Mostrar Modal
                         const modal = new bootstrap.Modal(document.getElementById('modalRegistro'));
                         modal.show();
                     } else {
