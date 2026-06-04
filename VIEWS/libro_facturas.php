@@ -1,12 +1,8 @@
 <?php
-// 1. Conexión a la base de datos
 require_once '../BACKEND/conecxion_bd.php';
 
-// 2. Llamamos al archivo de consultas que creamos
 require_once '../BACKEND/consulta_factura.php';
 
-// 3. Obtenemos las facturas reales de la base de datos
-// Pasamos $conexion porque es la variable que definiste en conecxion_bd.php
 $facturas = obtenerLibroFacturas($conexion);
 ?>
 
@@ -38,7 +34,7 @@ $facturas = obtenerLibroFacturas($conexion);
             <nav class="menu">
                 <a href="../VIEWS/inicio.php"><i class="fas fa-home"></i> Inicio</a>
                 <a href="../VIEWS/empresas_clientes.php"><i class="fas fa-city"></i> Empresas Clientes</a>
-                <a href="../VIEWS/registro_proveedor.php"><i class="fas fa-city"></i> Proveedores</a>
+                <a href="../VIEWS/registro_proveedor.php "class="active"><i class="fas fa-truck"></i> Proveedores</a>
                 <a href="../VIEWS/libro_facturas.php" class="active"><i class="fas fa-file-invoice"></i> Libro de Facturas</a>
                 <a href="../VIEWS/asientos_diario.php"><i class="fas fa-book"></i> Asientos Diario</a>
                 <a href="../VIEWS/libro_mayor.php"><i class="fas fa-chart-line"></i> Libro Mayor</a>
