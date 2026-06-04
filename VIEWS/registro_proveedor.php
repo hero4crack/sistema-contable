@@ -1,5 +1,4 @@
 <?php
-
 require_once '../BACKEND/conecxion_bd.php';
 require_once '../BACKEND/consulta_proveedor.php';
 
@@ -96,7 +95,8 @@ $proveedores = obtenerListaProveedores($conexion);
                                             </td>
                                             <td>
                                                 <button class="config-btn btn-ver-ficha" title="Ver Ficha" data-id="<?php echo $p['id_proveedor']; ?>"><i class="fas fa-eye"></i></button>
-                                                <a href="../BACKEND/eliminar_proveedor.php?id=<?php echo $p['id_proveedor']; ?>" class="btn btn-danger fs-6 text-white p-1" title="Inactivar"><i class="fa-solid fa-trash"></i></a>
+                                                <button class="btn btn-warning fs-6 text-white p-1 btn-editar-proveedor" title="Editar" data-id="<?php echo $p['id_proveedor']; ?>" style="border-radius: 4px; width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; background: #f59e0b; border: none; margin-right: 2px;"><i class="fas fa-pen" style="font-size: 0.85rem;"></i></button>
+                                                <a href="../BACKEND/eliminar_proveedor.php?id=<?php echo $p['id_proveedor']; ?>" class="btn btn-danger fs-6 text-white p-1" title="Inactivar" style="width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; padding: 0 !important;"><i class="fa-solid fa-trash" style="font-size: 0.85rem;"></i></a>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
@@ -194,6 +194,88 @@ $proveedores = obtenerListaProveedores($conexion);
         </div>
     </div>
 
+    <div class="modal fade" id="modalEditarProveedor" tabindex="-1" aria-labelledby="modalEditarProveedorLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                <div class="modal-header" style="background: #0f172a; color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title" id="modalEditarProveedorLabel"><i class="fas fa-pen-to-square me-2"></i> Modificar Expediente de Proveedor</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="../BACKEND/editar_proveedor.php" method="POST" id="formEditarProveedor">
+                    <input type="hidden" name="id_proveedor" id="edit_id_proveedor">
+                    
+                    <div class="modal-body" style="padding: 30px;">
+                        
+                        <h6 class="text-secondary border-bottom pb-2 mb-3 fw-bold"><i class="fas fa-id-card me-2"></i>Datos Fiscales Básicos</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">RIF del Proveedor <span class="text-danger">*</span></label>
+                                <input type="text" name="rif" id="edit_rif" class="form-control" required pattern="^[JGVGjgwg]-\d{8}-\d$|^[JGVGjgwg]\d{9}$">
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Razón Social <span class="text-danger">*</span></label>
+                                <input type="text" name="razon_social" id="edit_razon_social" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nombre Comercial</label>
+                                <input type="text" name="nombre_comercial" id="edit_nombre_comercial" class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Tipo Contribuyente</label>
+                                <select name="tipo_contribuyente" id="edit_tipo_contribuyente" class="form-select">
+                                    <option value="ORDINARIO">Ordinario</option>
+                                    <option value="FORMAL">Formal</option>
+                                    <option value="ESPECIAL">Especial</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-warning fw-bold"><i class="fas fa-percentage me-1"></i> Retención (IVA)</label>
+                                <select name="porcentaje_retencion" id="edit_porcentaje_retencion" class="form-select border-warning bg-light-subtle fw-semibold">
+                                    <option value="0">0% (Exento)</option>
+                                    <option value="75">75% (Estándar)</option>
+                                    <option value="100">100% (Especial)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h6 class="text-secondary border-bottom pb-2 mb-3 fw-bold"><i class="fas fa-map-marker-alt me-2"></i>Ubicación e Información de Contacto</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Dirección Fiscal <span class="text-danger">*</span></label>
+                                <textarea name="direccion_fiscal" id="edit_direccion_fiscal" class="form-control" rows="2" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Teléfono de la Empresa</label>
+                                <input type="text" name="telefono" id="edit_telefono" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Correo Electrónico Corporativo</label>
+                                <input type="email" name="correo_electronico" id="edit_correo_electronico" class="form-control">
+                            </div>
+                        </div>
+
+                        <h6 class="text-secondary border-bottom pb-2 mb-3 fw-bold"><i class="fas fa-user-tie me-2"></i>Asesor o Persona de Contacto</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nombre del Asesor de Ventas</label>
+                                <input type="text" name="nombre_contacto" id="edit_nombre_contacto" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Teléfono Directo del Contacto</label>
+                                <input type="text" name="telefono_contacto" id="edit_telefono_contacto" class="form-control">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer" style="background: #f8fafc; border-radius: 0 0 15px 15px;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning text-white" style="background: #f59e0b; border: none; padding: 10px 25px;"><i class="fas fa-sync-alt me-2"></i>Actualizar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="modalVerFicha" tabindex="-1" aria-labelledby="modalVerFichaLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
@@ -202,13 +284,7 @@ $proveedores = obtenerListaProveedores($conexion);
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4" id="contenido_ficha">
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Cargando...</span>
-                        </div>
-                        <p class="text-muted mt-2">Buscando expediente fiscal...</p>
                     </div>
-                </div>
                 <div class="modal-footer" style="background: #f8fafc; border-radius: 0 0 15px 15px;">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cerrar Ficha</button>
                 </div>
@@ -220,33 +296,75 @@ $proveedores = obtenerListaProveedores($conexion);
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    // ----------------------------------------------------
+    // LÓGICA ASÍNCRONA: MOSTRAR FICHA TÉCNICA (HTML)
+    // ----------------------------------------------------
     const botonesVer = document.querySelectorAll('.btn-ver-ficha');
-    
     botonesVer.forEach(boton => {
         boton.addEventListener('click', function() {
             const idProveedor = this.getAttribute('data-id');
             const contenedorFicha = document.getElementById('contenido_ficha');
             
-            // Estado de precarga
             contenedorFicha.innerHTML = `
                 <div class="text-center py-4">
                     <div class="spinner-border text-primary" role="status"></div>
                     <p class="text-muted mt-2">Consultando datos fiscales...</p>
                 </div>`;
             
-            // Invocar Modal de Bootstrap
             const modalFicha = new bootstrap.Modal(document.getElementById('modalVerFicha'));
             modalFicha.show();
             
-            // Llamada asíncrona al backend
             fetch(`../BACKEND/obtener_proveedor.php?id=${idProveedor}`)
                 .then(response => response.text())
                 .then(html => {
                     contenedorFicha.innerHTML = html;
                 })
                 .catch(error => {
-                    contenedorFicha.innerHTML = `<div class="alert alert-danger">Error en la comunicación con el servidor de base de datos.</div>`;
-                    console.error('Error en fetch:', error);
+                    contenedorFicha.innerHTML = `<div class="alert alert-danger">Error en la comunicación con el servidor.</div>`;
+                    console.error('Error:', error);
+                });
+        });
+    });
+
+    // ----------------------------------------------------
+    // LÓGICA ASÍNCRONA: COPIAR DATOS AL FORMULARIO DE EDICIÓN (JSON)
+    // ----------------------------------------------------
+    const botonesEditar = document.querySelectorAll('.btn-editar-proveedor');
+    const modalEditar = new bootstrap.Modal(document.getElementById('modalEditarProveedor'));
+
+    botonesEditar.forEach(boton => {
+        boton.addEventListener('click', function() {
+            const idProveedor = this.getAttribute('data-id');
+
+            // Petición al backend para capturar la estructura JSON
+            fetch(`../BACKEND/obtener_proveedor_json.php?id=${idProveedor}`)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        const p = res.data;
+                        
+                        // Rellenar dinámicamente los elementos inputs del Modal de Edición
+                        document.getElementById('edit_id_proveedor').value = p.id_proveedor;
+                        document.getElementById('edit_rif').value = p.rif;
+                        document.getElementById('edit_razon_social').value = p.razon_social;
+                        document.getElementById('edit_nombre_comercial').value = p.nombre_comercial || '';
+                        document.getElementById('edit_tipo_contribuyente').value = p.tipo_contribuyente;
+                        document.getElementById('edit_porcentaje_retencion').value = p.porcentaje_retencion;
+                        document.getElementById('edit_direccion_fiscal').value = p.direccion_fiscal;
+                        document.getElementById('edit_telefono').value = p.telefono || '';
+                        document.getElementById('edit_correo_electronico').value = p.correo_electronico || '';
+                        document.getElementById('edit_nombre_contacto').value = p.nombre_contacto || '';
+                        document.getElementById('edit_telefono_contacto').value = p.telefono_contacto || '';
+
+                        // Mostrar el Modal estructurado una vez cargados los datos
+                        modalEditar.show();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                })
+                .catch(error => {
+                    alert("No se pudieron recuperar los datos fiscales para edición.");
+                    console.error('Error en JSON Fetch:', error);
                 });
         });
     });
