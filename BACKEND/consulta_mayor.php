@@ -1,23 +1,31 @@
 <?php
+// BACKEND/consulta_mayor.php
+
 function obtenerLibroMayor($conexion) {
-    // Usamos el nombre exacto de tu tabla: fecha_asiento
+    // Corregido a 'catalogo_cuentas' en el FROM para solucionar el mysqli_sql_exception
     $sql = "SELECT 
-                c.codigo_cuenta, 
-                c.nombre_cuenta, 
-                SUM(IFNULL(m.debe, 0)) as total_debe, 
-                SUM(IFNULL(m.haber, 0)) as total_haber,
-                (SUM(IFNULL(m.debe, 0)) - SUM(IFNULL(m.haber, 0))) as saldo,
-                MAX(a.fecha_asiento) as fecha_operacion 
-            FROM catalogo_cuentas c
-            LEFT JOIN asiento_detalle m ON c.id_cuenta = m.id_cuenta
-            LEFT JOIN asiento_diario a ON m.id_asiento = a.id_asiento
-            GROUP BY c.id_cuenta, c.codigo_cuenta, c.nombre_cuenta
-            ORDER BY c.codigo_cuenta ASC";
-            
+                MAX(ad.fecha_asiento) as fecha_operacion,
+                cc.codigo_cuenta,
+                cc.nombre_cuenta,
+                SUM(det.debe) as total_debe,
+                SUM(det.haber) as total_haber,
+                CASE 
+                    -- Si el código de cuenta empieza con 1, 5 o 6 (Activos, Costos, Gastos): Debe - Haber
+                    WHEN cc.codigo_cuenta LIKE '1%' OR cc.codigo_cuenta LIKE '5%' OR cc.codigo_cuenta LIKE '6%' 
+                        THEN (SUM(det.debe) - SUM(det.haber))
+                    -- Si empieza con 2, 3 o 4 (Pasivos, Patrimonio, Ingresos): Haber - Debe
+                    ELSE (SUM(det.haber) - SUM(det.debe))
+                END as saldo
+            FROM catalogo_cuentas cc
+            INNER JOIN asiento_detalle det ON cc.id_cuenta = det.id_cuenta
+            INNER JOIN asiento_diario ad ON det.id_asiento = ad.id_asiento
+            GROUP BY cc.id_cuenta, cc.codigo_cuenta, cc.nombre_cuenta
+            ORDER BY cc.codigo_cuenta ASC";
+
     $resultado = $conexion->query($sql);
 
     if (!$resultado) {
-        die("Error en la consulta: " . $conexion->error);
+        die("Error crítico al procesar el Libro Mayor: " . $conexion->error);
     }
 
     return $resultado;
