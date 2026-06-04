@@ -2,7 +2,12 @@
 require_once '../BACKEND/conecxion_bd.php';
 require_once '../BACKEND/consulta_factura.php';
 
-$facturas = obtenerLibroFacturas($conexion);
+// Capturamos el mes y año del filtro GET, si no existen, usamos el mes y año actuales (2026)
+$mes_actual = isset($_GET['mes']) ? $_GET['mes'] : date('m');
+$anio_actual = isset($_GET['anio']) ? $_GET['anio'] : date('Y');
+
+// Pasamos los filtros a la función del backend
+$facturas = obtenerLibroFacturas($conexion, $mes_actual, $anio_actual);
 
 // Separamos los arrays en el servidor para alimentar cada pestaña de forma limpia
 $ventas = [];
@@ -17,6 +22,13 @@ if (isset($facturas) && !empty($facturas)) {
         }
     }
 }
+
+// Array de meses para el selector estético
+$meses = [
+    '01' => 'Enero', '02' => 'Febrero', '03' => 'Marzo', '04' => 'Abril',
+    '05' => 'Mayo', '06' => 'Junio', '07' => 'Julio', '08' => 'Agosto',
+    '09' => 'Septiembre', '10' => 'Octubre', '11' => 'Noviembre', '12' => 'Diciembre'
+];
 ?>
 
 <!DOCTYPE html>
@@ -31,7 +43,6 @@ if (isset($facturas) && !empty($facturas)) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="../JAVASCRIPT/bootstrap.bundle.min.js"></script>
     <style>
-        /* Estilos estéticos para nuestras pestañas fiscales */
         .tab-btn {
             padding: 10px 20px;
             font-weight: bold;
@@ -48,6 +59,20 @@ if (isset($facturas) && !empty($facturas)) {
         }
         .tab-btn:hover:not(.active-tab) {
             background: #cbd5e1;
+        }
+        .totales-footer {
+            background-color: #f8fafc !important;
+            font-weight: bold;
+            border-top: 3px double #cbd5e1 !important;
+            border-bottom: 3px double #cbd5e1 !important;
+        }
+        /* Contenedor de filtros */
+        .filter-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -83,6 +108,47 @@ if (isset($facturas) && !empty($facturas)) {
             <?php include('header.php') ?>
 
             <section class="content">
+                
+                <!-- SECCIÓN DE FILTROS FISCALES -->
+                <div class="filter-box">
+                    <form method="GET" action="libro_facturas.php" class="row align-items-end g-2">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;"><i class="fas fa-calendar-alt me-1"></i> Mes Fiscal</label>
+                            <select name="mes" class="form-select border-secondary-subtle">
+                                <?php foreach ($meses as $num => $nombre): ?>
+                                    <option value="<?php echo $num; ?>" <?php echo ($num == $mes_actual) ? 'selected' : ''; ?>>
+                                        <?php echo $nombre; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;"><i class="fas fa-clock me-1"></i> Año</label>
+                            <select name="anio" class="form-select border-secondary-subtle">
+                                <?php 
+                                $anio_base = 2024;
+                                $anio_limite = date('Y') + 1;
+                                for ($a = $anio_base; $a <= $anio_limite; $a++): 
+                                ?>
+                                    <option value="<?php echo $a; ?>" <?php echo ($a == $anio_actual) ? 'selected' : ''; ?>>
+                                        <?php echo $a; ?>
+                                    </option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-dark w-100 fw-bold">
+                                <i class="fas fa-filter me-1"></i> Filtrar Período
+                            </button>
+                        </div>
+                        <div class="col text-end">
+                            <span class="badge bg-secondary p-2 fs-6 text-uppercase fw-semibold">
+                                Período: <?php echo $meses[$mes_actual] . " " . $anio_actual; ?>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="d-flex justify-content-between align-items-end px-2">
                     <div>
                         <button id="btnTabVentas" class="tab-btn active-tab" onclick="cambiarLibro('VENTAS')">
@@ -101,11 +167,12 @@ if (isset($facturas) && !empty($facturas)) {
 
                 <div class="card" style="border-top-left-radius: 0px;">
                     
+                    <!-- ================= TABLA DE VENTAS ================= -->
                     <div id="contenedorVentas" class="table-wrapper">
                         <table id='tabla2' class="contable-table w-100">
                             <thead>
                                 <tr>
-                                    <th>id de factura</th>
+                                    <th style="width: 70px;">ID</th>
                                     <th>Fecha</th>
                                     <th>Nro. Factura / Control</th>
                                     <th>Cliente</th>
@@ -117,10 +184,21 @@ if (isset($facturas) && !empty($facturas)) {
                                 </tr>
                             </thead>
                             <tbody class='table-group-divider'>
-                                <?php if (!empty($ventas)): ?>
-                                    <?php foreach ($ventas as $v): ?>
+                                <?php 
+                                $total_base_ventas = 0;
+                                $total_exento_ventas = 0;
+                                $total_iva_ventas = 0;
+                                $total_general_ventas = 0;
+
+                                if (!empty($ventas)): 
+                                    foreach ($ventas as $v): 
+                                        $total_base_ventas += $v['base_imponible'];
+                                        $total_exento_ventas += $v['monto_exento'];
+                                        $total_iva_ventas += $v['monto_iva'];
+                                        $total_general_ventas += $v['total_factura'];
+                                ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($v['id_factura']); ?></td>
+                                            <td><strong class="text-secondary">#<?php echo $v['id_factura']; ?></strong></td>
                                             <td><?php echo date("d/m/Y", strtotime($v['fecha_documento'])); ?></td>
                                             <td>
                                                 <span style="display:block; font-weight: bold;"><?php echo $v['nro_factura']; ?></span>
@@ -139,18 +217,31 @@ if (isset($facturas) && !empty($facturas)) {
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="8" style="text-align:center; padding: 20px; color: #94a3b8;">No hay operaciones de ventas registradas.</td>
+                                        <td colspan="9" style="text-align:center; padding: 20px; color: #94a3b8;">No hay operaciones de ventas en este período.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
+                            <?php if (!empty($ventas)): ?>
+                            <tfoot>
+                                <tr class="totales-footer">
+                                    <td colspan="4" class="text-end text-uppercase pe-3">Totales Libro Ventas:</td>
+                                    <td><?php echo number_format($total_base_ventas, 2); ?> Bs.</td>
+                                    <td><?php echo number_format($total_exento_ventas, 2); ?> Bs.</td>
+                                    <td class="text-success">+<?php echo number_format($total_iva_ventas, 2); ?> Bs.</td>
+                                    <td style="color: #1e293b; font-weight: 800;"><?php echo number_format($total_general_ventas, 2); ?> Bs.</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                            <?php endif; ?>
                         </table>
                     </div>
 
+                    <!-- ================= TABLA DE COMPRAS ================= -->
                     <div id="contenedorCompras" class="table-wrapper d-none">
                         <table id='tabla' class="contable-table w-100">
                             <thead>
                                 <tr>
-                                    <th>id de factura</th>
+                                    <th style="width: 70px;">ID</th>
                                     <th>Fecha</th>
                                     <th>Nro. Factura / Control</th>
                                     <th>Proveedor</th>
@@ -162,11 +253,21 @@ if (isset($facturas) && !empty($facturas)) {
                                 </tr>
                             </thead>
                             <tbody class='table-group-divider'>
-                                <?php if (!empty($compras)): ?>
-                                    <?php foreach ($compras as $c): ?>
+                                <?php 
+                                $total_base_compras = 0;
+                                $total_iva_compras = 0;
+                                $total_exento_compras = 0;
+                                $total_general_compras = 0;
+
+                                if (!empty($compras)): 
+                                    foreach ($compras as $c): 
+                                        $total_base_compras += $c['base_imponible'];
+                                        $total_iva_compras += $c['monto_iva'];
+                                        $total_exento_compras += $c['monto_exento']; 
+                                        $total_general_compras += $c['total_factura'];
+                                ?>
                                         <tr>
-                                            
-                                            <td><?php echo htmlspecialchars($c['id_factura']); ?></td>
+                                            <td><strong class="text-secondary">#<?php echo $c['id_factura']; ?></strong></td>
                                             <td><?php echo date("d/m/Y", strtotime($c['fecha_documento'])); ?></td>
                                             <td>
                                                 <span style="display:block; font-weight: bold;"><?php echo $c['nro_factura']; ?></span>
@@ -190,10 +291,22 @@ if (isset($facturas) && !empty($facturas)) {
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="8" style="text-align:center; padding: 20px; color: #94a3b8;">No hay operaciones de compras registradas.</td>
+                                        <td colspan="9" style="text-align:center; padding: 20px; color: #94a3b8;">No hay operaciones de compras en este período.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
+                            <?php if (!empty($compras)): ?>
+                            <tfoot>
+                                <tr class="totales-footer">
+                                    <td colspan="4" class="text-end text-uppercase pe-3">Totales Libro Compras:</td>
+                                    <td><?php echo number_format($total_base_compras, 2); ?> Bs.</td>
+                                    <td class="text-danger">+<?php echo number_format($total_iva_compras, 2); ?> Bs.</td>
+                                    <td class="text-primary" style="background: #f0fdf4;"><?php echo number_format($total_exento_compras, 2); ?> Bs.</td>
+                                    <td style="color: #1e293b; font-weight: 800;"><?php echo number_format($total_general_compras, 2); ?> Bs.</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                            <?php endif; ?>
                         </table>
                     </div>
 
@@ -202,6 +315,7 @@ if (isset($facturas) && !empty($facturas)) {
         </main>
     </div>
 
+    <!-- Modales permanecen intactos -->
     <div class="modal fade" id="modalRegistro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
@@ -311,7 +425,6 @@ if (isset($facturas) && !empty($facturas)) {
         </div>
     </div>
 
-    
     <?php include('script.php'); ?>
 </body>
 
