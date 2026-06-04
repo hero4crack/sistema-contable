@@ -13,11 +13,11 @@ if (isset($_GET["iniciar"])) {
 
 
     // $sql="SELECT * FROM USUARIO WHERE usuario='$id_usuario' AND contraseña='$password' AND rol=1";
-    $sql = "SELECT * FROM usuarios where usuarios.username = '$username' AND usuarios.password= '$password'"; //Sirve para guardar la informacion de la consulta de la tabla (usuario) y se almacena en la variable $sql
+    $sql = "SELECT * FROM usuarios where usuarios.nombre_usuario = '$username' AND usuarios.password= '$password'"; //Sirve para guardar la informacion de la consulta de la tabla (usuario) y se almacena en la variable $sql
     $resultado = mysqli_query($conexion, $sql);
     $numero_registro = mysqli_num_rows($resultado);
 
-    $sql3 = "SELECT * FROM usuarios WHERE username = '$username'";
+    $sql3 = "SELECT * FROM usuarios WHERE nombre_usuario = '$username'";
     $resultado3 = mysqli_query($conexion, $sql3);
     $fila3 = mysqli_fetch_assoc($resultado3);
 

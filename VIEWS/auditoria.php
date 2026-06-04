@@ -18,6 +18,7 @@
             <nav class="menu">
                 <a href="../VIEWS/inicio.php"><i class="fas fa-home"></i> Inicio</a>
                 <a href="../VIEWS/empresas_clientes.php"><i class="fas fa-city"></i> Empresas Clientes</a>
+                <a href="../VIEWS/registro_proveedor.php"><i class="fas fa-city"></i> Proveedores</a>
                 <a href="../VIEWS/libro_facturas.php" class="active"><i class="fas fa-file-invoice"></i> Libro de Facturas</a>
                 <a href="../VIEWS/asientos_diario.php"><i class="fas fa-book"></i> Asientos Diario</a>
                 <a href="../VIEWS/libro_mayor.php"><i class="fas fa-chart-line"></i> Libro Mayor</a>
