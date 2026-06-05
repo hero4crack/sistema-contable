@@ -1,11 +1,15 @@
 <?php
 require_once '../BACKEND/conecxion_bd.php';
-require_once '../BACKEND/consulta_estado_resultados.php';
-$datos = obtenerEstadoResultados($conexion);
+require_once '../BACKEND/consulta_resultados.php';
+// ... (código PHP inicial para traer los datos)
+$r = obtenerEstadoResultados($conexion);
 
-$total_ingresos = 0;
-$total_costos = 0;
-$total_gastos = 0;
+$ventas = $r['4']; 
+$costos = abs($r['6']); // El costo resta
+$gastos = abs($r['5']); // Los gastos restan
+
+$utilidad_bruta = $ventas - $costos;
+$utilidad_neta  = $utilidad_bruta - $gastos;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -40,42 +44,18 @@ $total_gastos = 0;
             <?php include('header.php'); ?>
             <section class="content p-4">
                 <div class="card shadow">
-                    <div class="card-header bg-success text-white text-center">
-                        <h3 class="mb-0">Estado de Resultados</h3>
-                        <p class="mb-0 small">Periodo Actual</p>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-hover">
-                            <tbody>
-                                <?php 
-                                while($row = $datos->fetch_assoc()): 
-                                    $codigo = $row['codigo_cuenta'];
-                                    $monto = ($codigo[0] == '4') ? $row['saldo_ingreso'] : $row['saldo_egreso'];
-                                    
-                                    if($codigo[0] == '4') $total_ingresos += $monto;
-                                    if($codigo[0] == '5') $total_costos += $monto;
-                                    if($codigo[0] == '6') $total_gastos += $monto;
-                                ?>
-                                    <tr>
-                                        <td><?= $codigo ?> - <?= $row['nombre_cuenta'] ?></td>
-                                        <td class="text-end"><?= number_format($monto, 2, ',', '.') ?></td>
-                                    </tr>
-                                <?php endwhile; ?>
-                                
-                                <tr class="table-secondary fw-bold">
-                                    <td>UTILIDAD BRUTA (Ingresos - Costos)</td>
-                                    <td class="text-end"><?= number_format($total_ingresos - $total_costos, 2, ',', '.') ?></td>
-                                </tr>
-                                <tr class="table-dark fw-bold">
-                                    <?php $utilidad_neta = $total_ingresos - $total_costos - $total_gastos; ?>
-                                    <td>UTILIDAD O PÉRDIDA NETA DEL EJERCICIO</td>
-                                    <td class="text-end <?= ($utilidad_neta >= 0) ? 'text-success' : 'text-danger' ?>">
-                                        <?= number_format($utilidad_neta, 2, ',', '.') ?>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+    <div class="card-header bg-dark text-white"><h3>Estado de Resultados</h3></div>
+    <div class="card-body">
+        <table class="table">
+            <tr><td>Ventas Totales</td><td class="text-end"><?= number_format($ventas, 2) ?></td></tr>
+            <tr class="text-danger"><td>(-) Costo de Ventas</td><td class="text-end"><?= number_format($costos, 2) ?></td></tr>
+            <tr class="fw-bold"><td>= UTILIDAD BRUTA</td><td class="text-end"><?= number_format($utilidad_bruta, 2) ?></td></tr>
+            <tr class="text-danger"><td>(-) Gastos Operativos</td><td class="text-end"><?= number_format($gastos, 2) ?></td></tr>
+            <tr class="bg-primary text-white fw-bold"><td>= UTILIDAD NETA</td><td class="text-end"><?= number_format($utilidad_neta, 2) ?></td></tr>
+        </table>
+    </div>
+</div>
+
                 </div>
             </section>
         </main>

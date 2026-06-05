@@ -1,26 +1,46 @@
 <?php
+// BACKEND/consulta_balance.php
+
 function obtenerBalanceComprobacion($conexion) {
+    // Consulta matemática avanzada para distribuir sumas y saldos según naturaleza contable
     $sql = "SELECT 
-                c.codigo_cuenta, 
-                c.nombre_cuenta, 
-                SUM(IFNULL(m.debe, 0)) as sumas_debe, 
-                SUM(IFNULL(m.haber, 0)) as sumas_haber,
-                -- Cálculo de Saldos
+                cc.codigo_cuenta,
+                cc.nombre_cuenta,
+                SUM(det.debe) as sumas_debe,
+                SUM(det.haber) as sumas_haber,
+                
+                -- Cálculo dinámico del Saldo Deudor
                 CASE 
-                    WHEN (SUM(IFNULL(m.debe, 0)) - SUM(IFNULL(m.haber, 0))) > 0 
-                    THEN (SUM(IFNULL(m.debe, 0)) - SUM(IFNULL(m.haber, 0))) 
-                    ELSE 0 
+                    -- Cuentas de Activos (1), Costos (5) y Gastos (6): saldo natural en el Debe
+                    WHEN cc.codigo_cuenta LIKE '1%' OR cc.codigo_cuenta LIKE '5%' OR cc.codigo_cuenta LIKE '6%' THEN
+                        IF(SUM(det.debe) >= SUM(det.haber), SUM(det.debe) - SUM(det.haber), 0.00)
+                    -- Cuentas de Pasivos, Patrimonio e Ingresos: solo muestran saldo aquí si el Debe supera al Haber (Inusual)
+                    ELSE
+                        IF(SUM(det.debe) > SUM(det.haber), SUM(det.debe) - SUM(det.haber), 0.00)
                 END as saldo_deudor,
+
+                -- Cálculo dinámico del Saldo Acreedor
                 CASE 
-                    WHEN (SUM(IFNULL(m.haber, 0)) - SUM(IFNULL(m.debe, 0))) > 0 
-                    THEN (SUM(IFNULL(m.haber, 0)) - SUM(IFNULL(m.debe, 0))) 
-                    ELSE 0 
+                    -- Cuentas de Pasivos (2), Patrimonio (3) e Ingresos (4): saldo natural en el Haber
+                    WHEN cc.codigo_cuenta LIKE '2%' OR cc.codigo_cuenta LIKE '3%' OR cc.codigo_cuenta LIKE '4%' THEN
+                        IF(SUM(det.haber) >= SUM(det.debe), SUM(det.haber) - SUM(det.debe), 0.00)
+                    -- Cuentas de Activos, Costos y Gastos: solo muestran saldo aquí si el Haber supera al Debe (Inusual)
+                    ELSE
+                        IF(SUM(det.haber) > SUM(det.debe), SUM(det.haber) - SUM(det.debe), 0.00)
                 END as saldo_acreedor
-            FROM catalogo_cuentas c
-            INNER JOIN asiento_detalle m ON c.id_cuenta = m.id_cuenta
-            GROUP BY c.id_cuenta, c.codigo_cuenta, c.nombre_cuenta
-            ORDER BY c.codigo_cuenta ASC";
-            
-    return $conexion->query($sql);
+
+            FROM catalogo_cuentas cc
+            INNER JOIN asiento_detalle det ON cc.id_cuenta = det.id_cuenta
+            INNER JOIN asiento_diario ad ON det.id_asiento = ad.id_asiento
+            GROUP BY cc.id_cuenta, cc.codigo_cuenta, cc.nombre_cuenta
+            ORDER BY cc.codigo_cuenta ASC";
+
+    $resultado = $conexion->query($sql);
+
+    if (!$resultado) {
+        die("Error crítico al calcular el Balance de Comprobación: " . $conexion->error);
+    }
+
+    return $resultado;
 }
 ?>
