@@ -17,7 +17,7 @@ $datos_catalogo = obtenerCatalogo($conexion);
     <link rel="stylesheet" href="../DATATABLE/datatables1.css">
     <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_cliente.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="../JAVASCRIPT/bootstrap.bundle.min.js"></script>
 </head>
@@ -146,7 +146,20 @@ $datos_catalogo = obtenerCatalogo($conexion);
     </div>
     <?php include('script.php'); ?>
 
+   
 
+<script>
+function cargarDatos(id) {
+    // Llamamos al archivo que traerá los datos de la cuenta seleccionada
+    fetch('../BACKEND/obtener_cuenta.php?id=' + id)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('contenidoModal').innerHTML = html;
+            var myModal = new bootstrap.Modal(document.getElementById('modalEditar'));
+            myModal.show();
+        });
+}
+</script>
 </body>
 
 </html>
