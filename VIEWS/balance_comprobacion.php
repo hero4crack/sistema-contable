@@ -42,9 +42,12 @@ $totalSaldoAcreedor = 0;
             <?php include('header.php'); ?>
             <section class="content p-4">
                 <div class="card">
-                    <div class="card-header bg-dark text-white">
-                        <h3 class="mb-0 text-center">Balance de Comprobación</h3>
-                    </div>
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+    <h3 class="mb-0 text-center flex-grow-1">Balance de Comprobación</h3>
+    <button onclick="exportarExcel()" class="btn btn-sm btn-success">
+        <i class="fas fa-file-excel"></i> Exportar
+    </button>
+</div>
                     <div class="table-responsive p-3">
                         <table class="table table-bordered table-sm text-center">
                             <thead class="table-secondary">
@@ -104,5 +107,16 @@ $totalSaldoAcreedor = 0;
         </main>
     </div>
     <?php include('script.php'); ?>
+    <script>
+function exportarExcel() {
+    var tabla = document.querySelector("table");
+    var html = tabla.outerHTML;
+    var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+    var link = document.createElement("a");
+    link.download = "Balance_Comprobacion_<?= date('d_m_Y') ?>.xls";
+    link.href = url;
+    link.click();
+}
+</script>
 </body>
 </html>

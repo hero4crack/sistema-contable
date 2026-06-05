@@ -14,8 +14,9 @@ $datos_catalogo = obtenerCatalogo($conexion);
     <meta charset="UTF-8">
     <title>Catálogo de Cuentas | Contable EA</title>
     <link rel="stylesheet" href="../CSS/style_cliente.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        <script src="../JAVASCRIPT/bootstrap.bundle.min.js"></script>
+    <script src="../JAVASCRIPT/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -77,8 +78,14 @@ $datos_catalogo = obtenerCatalogo($conexion);
                     </td>
                     
                     <td>
-                        <button class="config-btn"><i class="fas fa-edit"></i></button>
+                        <td>
+    <button type="button" class="btn btn-warning btn-sm" 
+            onclick="cargarDatos(<?= $cuenta['id_cuenta'] ?>)">
+        <i class="fas fa-edit"></i>
+    </button>
+</td>
                     </td>
+                    
                 </tr>
                 <?php endwhile; ?>
                 </tbody>
@@ -88,5 +95,37 @@ $datos_catalogo = obtenerCatalogo($conexion);
         </main>
     </div>
     <?php include('script.php'); ?>
+
+    <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+   <!-- Modal -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"> <!-- "modal-dialog-centered" es la clave para que flote en el centro -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalEditarLabel">Editar Cuenta</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="contenidoModal">
+        <!-- Aquí cargará el formulario -->
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<script>
+function cargarDatos(id) {
+    // Llamamos al archivo que traerá los datos de la cuenta seleccionada
+    fetch('../BACKEND/obtener_cuenta.php?id=' + id)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('contenidoModal').innerHTML = html;
+            var myModal = new bootstrap.Modal(document.getElementById('modalEditar'));
+            myModal.show();
+        });
+}
+</script>
 </body>
 </html>
