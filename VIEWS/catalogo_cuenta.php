@@ -92,7 +92,7 @@ $datos_catalogo = obtenerCatalogo($conexion);
                                                         <h5 class="modal-title fw-bold text-white"><i class="fas fa-edit me-2"></i>EDITAR ENTIDAD #<?php echo $cuenta['id_cuenta'] ?></h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
-                                                    <form method="POST" action="../BACKEND/editar_cuenta.php">
+                                                    <form method="POST" action="../BACKEND/actualizar_cuenta.php">
                                                         <input type="hidden" name="id" value="<?php echo $cuenta['id_cuenta'] ?>">
                                                         <div class="modal-body">
                                                             <div class="seccion-titulo">DATOS DE LA EMPRESA</div>
