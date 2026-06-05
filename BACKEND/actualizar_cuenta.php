@@ -19,10 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             permite_movimiento = '$movimiento' 
             WHERE id_cuenta = '$id'";
 
-    $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("sssiii", $codigo, $nombre, $tipo, $nivel, $movimiento, $id);
-
-    if ($stmt->execute()) {
+    if ($conexion->query($sql) {
         header("Location: ../VIEWS/catalogo_cuenta.php?mensaje=Cuenta actualizada con éxito");
     } else {
         echo "Error: " . $stmt->error;
