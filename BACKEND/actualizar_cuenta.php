@@ -12,12 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // UPDATE exclusivo para la tabla de cuentas
     $sql = "UPDATE catalogo_cuentas SET 
-            codigo_cuenta = ?, 
-            nombre_cuenta = ?, 
-            tipo_cuenta = ?, 
-            nivel = ?, 
-            permite_movimiento = ? 
-            WHERE id_cuenta = ?";
+            codigo_cuenta = '$codigo', 
+            nombre_cuenta = '$nombre', 
+            tipo_cuenta = '$tipo', 
+            nivel = '$nivel', 
+            permite_movimiento = '$movimiento' 
+            WHERE id_cuenta = '$id'";
 
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param("sssiii", $codigo, $nombre, $tipo, $nivel, $movimiento, $id);
