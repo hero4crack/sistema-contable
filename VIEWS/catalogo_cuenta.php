@@ -99,16 +99,16 @@ $datos_catalogo = obtenerCatalogo($conexion);
                                                             <div class="row g-2">
                                                                 <div class="col-md-6 mb-2">
                                                                     <label class="form-label small fw-bold">Nombre de cuenta</label>
-                                                                    <input class="form-control" type="text" name="empresa" value="<?php echo $cuenta['nombre_cuenta'] ?>" required>
+                                                                    <input class="form-control" type="text" name="cuenta" value="<?php echo $cuenta['nombre_cuenta'] ?>" required>
                                                                 </div>
 
                                                                 <div class="col-md-4 mb-2">
                                                                     <label class="form-label small fw-bold">Nivel</label>
-                                                                    <input class="form-control" type="text" name="social" value="<?php echo $cuenta['nivel'] ?>" required>
+                                                                    <input class="form-control" type="text" name="nivel" value="<?php echo $cuenta['nivel'] ?>" required>
                                                                 </div>
                                                                 <div class="col-md-4 mb-2">
                                                                     <label class="form-label small fw-bold">Tipo</label>
-                                                                    <select class="form-select" name="contribuyente">
+                                                                    <select class="form-select" name="tipo">
                                                                         <option value="Activo" <?php echo ($cuenta['tipo_cuenta'] == 'Activo') ? 'selected' : ''; ?>>Activo</option>
                                                                         <option value="Pasivo" <?php echo ($cuenta['tipo_cuenta'] == 'Pasivo') ? 'selected' : ''; ?>>Pasivo</option>
                                                                         <option value="Patrimonio" <?php echo ($cuenta['tipo_cuenta'] == 'Patrimonio') ? 'selected' : ''; ?>>Patrimonio</option>
