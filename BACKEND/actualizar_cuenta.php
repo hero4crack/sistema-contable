@@ -19,11 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             permite_movimiento = '$movimiento' 
             WHERE id_cuenta = '$id'";
 
-    if ($conexion->query($sql) {
+    if ($conexion->query($sql)) {
         header("Location: ../VIEWS/catalogo_cuenta.php?mensaje=Cuenta actualizada con éxito");
     } else {
-        echo "Error: " . $stmt->error;
+         echo "Error al actualizar: " . $conexion->error;
     }
-    $stmt->close();
+    
 }
 ?>
