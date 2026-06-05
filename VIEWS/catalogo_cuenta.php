@@ -45,7 +45,6 @@ $datos_catalogo = obtenerCatalogo($conexion);
 
         <main class="viewport">
 
-<<<<<<< HEAD
             <?php include_once('header.php') ?>
 
             <section class="content">
@@ -143,92 +142,11 @@ $datos_catalogo = obtenerCatalogo($conexion);
                     </table>
                 </div>
             </section>
-=======
-                    <section class="content">
-    <div class="table-wrapper">
-        <table class="contable-table">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Nombre de la Cuenta</th>
-                    <th>Tipo</th>
-                    <th>Nivel</th>
-                    <th>Movimiento</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php 
-                // 3. Recorremos los datos de la base de datos
-                while($cuenta = $datos_catalogo->fetch_assoc()): 
-                    // Calculamos la sangría según el nivel
-                    $sangria = ($cuenta['nivel'] - 1) * 25;
-                ?>
-                <tr class="nivel-<?php echo $cuenta['nivel']; ?>">
-                    <td><?php echo $cuenta['codigo_cuenta']; ?></td>
-                    
-                    <td style="padding-left: <?php echo $sangria; ?>px;">
-                        <?php echo $cuenta['nombre_cuenta']; ?>
-                    </td>
-                    
-                    <td><?php echo $cuenta['tipo_cuenta']; ?></td>
-                    <td><?php echo $cuenta['nivel']; ?></td>
-                    
-                    <td>
-                        <?php echo ($cuenta['permite_movimiento'] == 1) ? '✅ Sí' : '❌ No'; ?>
-                    </td>
-                    
-                    <td>
-                        <td>
-    <button type="button" class="btn btn-warning btn-sm" 
-            onclick="cargarDatos(<?= $cuenta['id_cuenta'] ?>)">
-        <i class="fas fa-edit"></i>
-    </button>
-</td>
-                    </td>
-                    
-                </tr>
-                <?php endwhile; ?>
-                </tbody>
-            </table>
-            </div>
-                    </section>
->>>>>>> dd58f19869982c219554300b0d30f2977ed9e580
         </main>
     </div>
     <?php include('script.php'); ?>
 
-    <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-   <!-- Modal -->
-<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered"> <!-- "modal-dialog-centered" es la clave para que flote en el centro -->
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalEditarLabel">Editar Cuenta</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="contenidoModal">
-        <!-- Aquí cargará el formulario -->
-      </div>
-    </div>
-  </div>
-</div>
-  </div>
-</div>
 
-<script>
-function cargarDatos(id) {
-    // Llamamos al archivo que traerá los datos de la cuenta seleccionada
-    fetch('../BACKEND/obtener_cuenta.php?id=' + id)
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('contenidoModal').innerHTML = html;
-            var myModal = new bootstrap.Modal(document.getElementById('modalEditar'));
-            myModal.show();
-        });
-}
-</script>
 </body>
 
 </html>
