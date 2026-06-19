@@ -1,9 +1,21 @@
 <?php
+// ============================================
+// 1. PRIMERO: Incluir sesión (como en inicio.php)
+// ============================================
+include_once '../BACKEND/conexion_login.php';
+
+// 2. Verificar autenticación
+if (!isset($_SESSION['usuario'])) {
+    header("Location: ../VIEWS/index.php");
+    exit();
+}
+
+// 3. Incluir los demás archivos
 require_once '../BACKEND/conecxion_bd.php';
 require_once '../BACKEND/consulta_factura.php';
 
 // ============================================
-// 1. OBTENER EMPRESAS PARA EL SELECTOR
+// 4. OBTENER EMPRESAS PARA EL SELECTOR
 // ============================================
 $query_empresas = "SELECT id_empresa, nombre_empresa, rif FROM empresas_clientes WHERE estado_activo = 1 ORDER BY nombre_empresa ASC";
 $result_empresas = mysqli_query($conexion, $query_empresas);
@@ -13,7 +25,7 @@ while ($row = mysqli_fetch_assoc($result_empresas)) {
 }
 
 // ============================================
-// 2. OBTENER PROVEEDORES PARA EL SELECTOR
+// 5. OBTENER PROVEEDORES PARA EL SELECTOR
 // ============================================
 $query_proveedores = "SELECT id_proveedor, razon_social, rif FROM proveedores WHERE estado_activo = 1 ORDER BY razon_social ASC";
 $result_proveedores = mysqli_query($conexion, $query_proveedores);
@@ -23,7 +35,7 @@ while ($row = mysqli_fetch_assoc($result_proveedores)) {
 }
 
 // ============================================
-// 3. CAPTURAR FILTROS (mes, año, empresa, proveedor)
+// 6. CAPTURAR FILTROS (mes, año, empresa, proveedor)
 // ============================================
 $mes_actual = isset($_GET['mes']) ? $_GET['mes'] : date('m');
 $anio_actual = isset($_GET['anio']) ? $_GET['anio'] : date('Y');
@@ -31,7 +43,7 @@ $id_empresa_filtro = isset($_GET['id_empresa']) ? $_GET['id_empresa'] : '';
 $id_proveedor_filtro = isset($_GET['id_proveedor']) ? $_GET['id_proveedor'] : '';
 
 // ============================================
-// 4. OBTENER FACTURAS FILTRADAS
+// 7. OBTENER FACTURAS FILTRADAS
 // ============================================
 $resultado_facturas = obtenerLibroFacturas($conexion, $mes_actual, $anio_actual, $id_empresa_filtro, $id_proveedor_filtro);
 
@@ -56,7 +68,6 @@ $meses = [
     '09' => 'Septiembre', '10' => 'Octubre', '11' => 'Noviembre', '12' => 'Diciembre'
 ];
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -139,6 +150,32 @@ $meses = [
             letter-spacing: 0.5px;
             font-weight: 700;
         }
+        .btn-editar {
+            background: transparent;
+            border: none;
+            color: #f59e0b;
+            transition: all 0.3s;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .btn-editar:hover {
+            background: #fef3c7;
+            color: #d97706;
+            transform: scale(1.1);
+        }
+        .btn-eliminar {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            transition: all 0.3s;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .btn-eliminar:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 
@@ -146,6 +183,13 @@ $meses = [
     <?php if(isset($_GET['status']) && $_GET['status'] == 'success'): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 20px;">
         <strong>¡Excelente!</strong> El movimiento ha sido procesado correctamente en el libro fiscal.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php endif; ?>
+
+    <?php if(isset($_GET['status']) && $_GET['status'] == 'updated'): ?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert" style="margin: 20px;">
+        <strong>¡Actualizado!</strong> La factura ha sido modificada correctamente.
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     <?php endif; ?>
@@ -348,8 +392,12 @@ $meses = [
                                             <td class="text-success fw-semibold">+<?php echo number_format($v['monto_iva'], 2); ?> Bs.</td>
                                             <td style="font-weight: 800; color: #1e293b;"><?php echo number_format($v['total_factura'], 2); ?> Bs.</td>
                                             <td>
-                                                <button class="config-btn text-warning" title="Editar Venta" onclick="editarFactura(<?php echo $v['id_factura']; ?>)" style="background: transparent; border: none; margin-right: 5px;"><i class="fas fa-edit"></i></button>
-                                                <a href="../BACKEND/eliminar_facturas.php?id_factura=<?php echo $v['id_factura'] ?>" class="btn btn-danger fs-6 text-white p-1" style="width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; padding: 0 !important;"> <i class="fa-solid fa-trash" style="font-size: 0.85rem;"></i></a>
+                                                <button class="btn-editar" title="Editar Venta" onclick="editarFactura(<?php echo $v['id_factura']; ?>)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <a href="../BACKEND/eliminar_facturas.php?id_factura=<?php echo $v['id_factura'] ?>" class="btn-eliminar" title="Eliminar Venta" onclick="return confirm('¿Estás seguro de eliminar esta factura?')">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -428,8 +476,12 @@ $meses = [
                                             <td class="text-primary fw-bold" style="background: #f0fdf4;"><?php echo number_format($c['monto_exento'], 2); ?> Bs.</td>
                                             <td style="font-weight: 800; color: #1e293b;"><?php echo number_format($c['total_factura'], 2); ?> Bs.</td>
                                             <td>
-                                                <button class="config-btn text-warning" title="Editar Compra" onclick="editarFactura(<?php echo $c['id_factura']; ?>)" style="background: transparent; border: none; margin-right: 5px;"><i class="fas fa-edit"></i></button>
-                                                <a href="../BACKEND/eliminar_facturas.php?id_factura=<?php echo $c['id_factura'] ?>" class="btn btn-danger fs-6 text-white p-1" style="width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; padding: 0 !important;"> <i class="fa-solid fa-trash" style="font-size: 0.85rem;"></i></a>
+                                                <button class="btn-editar" title="Editar Compra" onclick="editarFactura(<?php echo $c['id_factura']; ?>)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <a href="../BACKEND/eliminar_facturas.php?id_factura=<?php echo $c['id_factura'] ?>" class="btn-eliminar" title="Eliminar Compra" onclick="return confirm('¿Estás seguro de eliminar esta factura?')">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -577,6 +629,120 @@ $meses = [
         </div>
     </div>
 
+    <!-- ============================================ -->
+    <!-- MODAL DE EDICIÓN DE FACTURA                   -->
+    <!-- ============================================ -->
+    <div class="modal fade" id="modalEdicion" tabindex="-1" aria-labelledby="edicionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                <div class="modal-header" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title" id="edicionModalLabel">
+                        <i class="fas fa-edit me-2"></i> Editar Factura
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="../BACKEND/actualizar_factura.php" method="POST" id="formEdicion">
+                    <input type="hidden" name="id_factura" id="edit_id_factura_modal" value="">
+                    
+                    <div class="modal-body" style="padding: 30px;">
+                        <div class="row g-3">
+                            
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label fw-bold text-secondary">Fecha de Emisión</label>
+                                <input type="date" name="fecha_documento" id="edit_fecha_documento" class="form-control border-primary" required>
+                            </div>
+
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label fw-bold text-secondary">Tipo de Movimiento</label>
+                                <select name="tipo_transaccion" id="edit_tipo_transaccion" class="form-select border-primary fw-semibold" onchange="alternarTercerosEdicion()" required>
+                                    <option value="VENTA">Venta (Libro Ventas)</option>
+                                    <option value="COMPRA">Compra (Libro Compras)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-2" id="edit_grupo_cliente">
+                                <label class="form-label fw-bold text-success"><i class="fas fa-city me-1"></i> Empresa Cliente</label>
+                                <select name="id_empresa" id="edit_id_empresa" class="form-select border-success">
+                                    <option value="">Seleccione...</option>
+                                    <?php
+                                    $empresas_edit = mysqli_query($conexion, "SELECT id_empresa, nombre_empresa FROM empresas_clientes WHERE estado_activo = '1' ORDER BY nombre_empresa ASC");
+                                    while ($emp = $empresas_edit->fetch_assoc()):
+                                    ?>
+                                        <option value="<?php echo $emp['id_empresa']; ?>"><?php echo $emp['nombre_empresa']; ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-2 d-none" id="edit_grupo_proveedor">
+                                <label class="form-label fw-bold text-warning"><i class="fas fa-truck me-1"></i> Proveedor</label>
+                                <select name="id_proveedor" id="edit_id_proveedor" class="form-select border-warning">
+                                    <option value="">Seleccione...</option>
+                                    <?php
+                                    $provEditQuery = $conexion->query("SELECT id_proveedor, razon_social FROM proveedores WHERE estado_activo = 1");
+                                    while ($prov = $provEditQuery->fetch_assoc()):
+                                    ?>
+                                        <option value="<?php echo $prov['id_proveedor']; ?>"><?php echo $prov['razon_social']; ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nro. Factura</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-hashtag text-muted"></i></span>
+                                    <input type="text" name="nro_factura" id="edit_nro_factura" class="form-control" placeholder="Ej: 00234" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nro. Control</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-shield-alt text-muted"></i></span>
+                                    <input type="text" name="nro_control" id="edit_nro_control" class="form-control" placeholder="Ej: 00-00234" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 d-none" id="edit_grupo_comprobante">
+                                <label class="form-label fw-bold text-primary"><i class="fas fa-receipt me-1"></i> Nro. Comprobante de Retención (SENIAT)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-file-signature text-muted"></i></span>
+                                    <input type="text" name="nro_comprobante_retencion" id="edit_nro_comprobante_retencion" class="form-control border-primary" placeholder="Ej: 20260600000001">
+                                </div>
+                                <small class="text-muted">Formato exigido por el SENIAT: Año (4d) + Mes (2d) + Secuencia (8d).</small>
+                            </div>
+
+                            <hr class="text-muted my-4">
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-dark">Base Imponible (Bs.)</label>
+                                <input type="number" step="0.01" min="0" name="base_imponible" id="edit_base_modal" class="form-control fw-bold border-dark" oninput="calcularTotalesEdicion()" required placeholder="0.00">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold text-secondary">Monto Exento (Bs.)</label>
+                                <input type="number" step="0.01" min="0" name="monto_exento" id="edit_exento_modal" class="form-control text-secondary" oninput="calcularTotalesEdicion()" value="0.00">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold text-danger">IVA (16% Bs.)</label>
+                                <input type="text" name="monto_iva" id="edit_iva_modal" class="form-control text-danger fw-bold" readonly style="background: #fff5f5; border-color: #feb2b2;" value="0.00">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-primary">Total Factura (Bs.)</label>
+                                <input type="hidden" name="total_factura" id="edit_total_modal_hidden" value="0.00">
+                                <input type="text" id="edit_iva_total_visual" class="form-control bg-primary-subtle text-primary fw-bolder fs-5 border-primary" readonly value="0.00">
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background: #f8fafc; border-radius: 0 0 15px 15px;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning" style="background: #f59e0b; border: none; padding: 10px 25px; font-weight: bold; color: white;">
+                            <i class="fas fa-save me-1"></i> Actualizar Factura
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <?php include('script.php'); ?>
 
     <script>
@@ -598,7 +764,7 @@ $meses = [
         }
 
         // ============================================
-        // FUNCIONES PARA EL MODAL
+        // FUNCIONES PARA EL MODAL DE REGISTRO
         // ============================================
         function alternarTerceros() {
             var tipo = document.getElementById('tipo_transaccion').value;
@@ -633,8 +799,81 @@ $meses = [
             document.getElementById('total_modal_hidden').value = total.toFixed(2);
         }
 
+        // ============================================
+        // FUNCIONES PARA EL MODAL DE EDICIÓN
+        // ============================================
         function editarFactura(id) {
-            alert('Función de edición en desarrollo');
+            // Mostrar modal
+            var modal = new bootstrap.Modal(document.getElementById('modalEdicion'));
+            modal.show();
+            
+            // Cargar datos de la factura vía AJAX
+            $.ajax({
+                url: '../BACKEND/obtener_factura.php',
+                type: 'GET',
+                data: { id: id },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.success) {
+                        var f = data.factura;
+                        
+                        // Llenar campos del formulario
+                        document.getElementById('edit_id_factura_modal').value = f.id_factura;
+                        document.getElementById('edit_fecha_documento').value = f.fecha_documento;
+                        document.getElementById('edit_tipo_transaccion').value = f.tipo_transaccion;
+                        document.getElementById('edit_nro_factura').value = f.nro_factura;
+                        document.getElementById('edit_nro_control').value = f.nro_control;
+                        document.getElementById('edit_nro_comprobante_retencion').value = f.nro_comprobante_retencion || '';
+                        document.getElementById('edit_base_modal').value = f.base_imponible;
+                        document.getElementById('edit_exento_modal').value = f.monto_exento || 0;
+                        
+                        // Calcular IVA y total
+                        calcularTotalesEdicion();
+                        
+                        // Seleccionar empresa o proveedor según tipo
+                        if (f.tipo_transaccion === 'VENTA') {
+                            document.getElementById('edit_id_empresa').value = f.id_empresa || '';
+                            document.getElementById('edit_grupo_cliente').classList.remove('d-none');
+                            document.getElementById('edit_grupo_proveedor').classList.add('d-none');
+                            document.getElementById('edit_grupo_comprobante').classList.add('d-none');
+                        } else {
+                            document.getElementById('edit_id_proveedor').value = f.id_tercero || '';
+                            document.getElementById('edit_grupo_cliente').classList.add('d-none');
+                            document.getElementById('edit_grupo_proveedor').classList.remove('d-none');
+                            document.getElementById('edit_grupo_comprobante').classList.remove('d-none');
+                        }
+                    } else {
+                        alert('Error al cargar los datos de la factura: ' + data.message);
+                    }
+                },
+                error: function() {
+                    alert('Error de conexión al servidor');
+                }
+            });
+        }
+
+        function calcularTotalesEdicion() {
+            var base = parseFloat(document.getElementById('edit_base_modal').value) || 0;
+            var exento = parseFloat(document.getElementById('edit_exento_modal').value) || 0;
+            var iva = base * 0.16;
+            var total = base + exento + iva;
+            
+            document.getElementById('edit_iva_modal').value = iva.toFixed(2);
+            document.getElementById('edit_iva_total_visual').value = total.toFixed(2) + ' Bs.';
+            document.getElementById('edit_total_modal_hidden').value = total.toFixed(2);
+        }
+
+        function alternarTercerosEdicion() {
+            var tipo = document.getElementById('edit_tipo_transaccion').value;
+            if (tipo === 'VENTA') {
+                document.getElementById('edit_grupo_cliente').classList.remove('d-none');
+                document.getElementById('edit_grupo_proveedor').classList.add('d-none');
+                document.getElementById('edit_grupo_comprobante').classList.add('d-none');
+            } else {
+                document.getElementById('edit_grupo_cliente').classList.add('d-none');
+                document.getElementById('edit_grupo_proveedor').classList.remove('d-none');
+                document.getElementById('edit_grupo_comprobante').classList.remove('d-none');
+            }
         }
     </script>
 
