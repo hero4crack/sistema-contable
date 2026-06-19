@@ -2,19 +2,34 @@
 require_once '../BACKEND/conecxion_bd.php';
 require_once '../BACKEND/consulta_factura.php';
 
-// Capturamos el mes y año del filtro GET, si no existen, usamos el mes y año actuales (2026)
+// ============================================
+// 1. OBTENER EMPRESAS PARA EL SELECTOR
+// ============================================
+$query_empresas = "SELECT id_empresa, nombre_empresa, rif FROM empresas_clientes WHERE estado_activo = 1 ORDER BY nombre_empresa ASC";
+$result_empresas = mysqli_query($conexion, $query_empresas);
+$empresas = [];
+while ($row = mysqli_fetch_assoc($result_empresas)) {
+    $empresas[] = $row;
+}
+
+// ============================================
+// 2. CAPTURAR FILTROS (mes, año, empresa)
+// ============================================
 $mes_actual = isset($_GET['mes']) ? $_GET['mes'] : date('m');
 $anio_actual = isset($_GET['anio']) ? $_GET['anio'] : date('Y');
+$id_empresa_filtro = isset($_GET['id_empresa']) ? $_GET['id_empresa'] : '';
 
-// Pasamos los filtros a la función del backend
-$facturas = obtenerLibroFacturas($conexion, $mes_actual, $anio_actual);
+// ============================================
+// 3. OBTENER FACTURAS FILTRADAS
+// ============================================
+$resultado_facturas = obtenerLibroFacturas($conexion, $mes_actual, $anio_actual, $id_empresa_filtro);
 
-// Separamos los arrays en el servidor para alimentar cada pestaña de forma limpia
+// Separar ventas y compras
 $ventas = [];
 $compras = [];
 
-if (isset($facturas) && !empty($facturas)) {
-    foreach ($facturas as $f) {
+if ($resultado_facturas && $resultado_facturas->num_rows > 0) {
+    while ($f = $resultado_facturas->fetch_assoc()) {
         if ($f['tipo_transaccion'] === 'VENTA') {
             $ventas[] = $f;
         } else {
@@ -23,7 +38,7 @@ if (isset($facturas) && !empty($facturas)) {
     }
 }
 
-// Array de meses para el selector estético
+// Array de meses
 $meses = [
     '01' => 'Enero', '02' => 'Febrero', '03' => 'Marzo', '04' => 'Abril',
     '05' => 'Mayo', '06' => 'Junio', '07' => 'Julio', '08' => 'Agosto',
@@ -37,7 +52,6 @@ $meses = [
 <head>
     <meta charset="UTF-8">
     <title>Libro de Facturas | Contable EA</title>
-    <link rel="stylesheet" href="../DATATABLE/datatables1.css">
     <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -66,13 +80,35 @@ $meses = [
             border-top: 3px double #cbd5e1 !important;
             border-bottom: 3px double #cbd5e1 !important;
         }
-        /* Contenedor de filtros */
         .filter-box {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
+        }
+        .empresa-selector {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        .empresa-selector:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        .table th {
+            white-space: nowrap;
+        }
+        .sin-datos {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8;
         }
     </style>
 </head>
@@ -109,11 +145,33 @@ $meses = [
 
             <section class="content">
                 
-                <!-- SECCIÓN DE FILTROS FISCALES -->
+                <!-- ============================================ -->
+                <!-- SECCIÓN DE FILTROS CON EMPRESA              -->
+                <!-- ============================================ -->
                 <div class="filter-box">
                     <form method="GET" action="libro_facturas.php" class="row align-items-end g-2">
+                        
+                        <!-- Selector de Empresa -->
                         <div class="col-md-3">
-                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;"><i class="fas fa-calendar-alt me-1"></i> Mes Fiscal</label>
+                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;">
+                                <i class="fas fa-building me-1"></i> Empresa
+                            </label>
+                            <select name="id_empresa" class="form-select empresa-selector">
+                                <option value="">Todas las empresas</option>
+                                <?php foreach ($empresas as $emp): ?>
+                                    <option value="<?php echo $emp['id_empresa']; ?>" 
+                                        <?php echo ($id_empresa_filtro == $emp['id_empresa']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($emp['nombre_empresa']); ?> 
+                                        (<?php echo htmlspecialchars($emp['rif']); ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;">
+                                <i class="fas fa-calendar-alt me-1"></i> Mes Fiscal
+                            </label>
                             <select name="mes" class="form-select border-secondary-subtle">
                                 <?php foreach ($meses as $num => $nombre): ?>
                                     <option value="<?php echo $num; ?>" <?php echo ($num == $mes_actual) ? 'selected' : ''; ?>>
@@ -123,7 +181,9 @@ $meses = [
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;"><i class="fas fa-clock me-1"></i> Año</label>
+                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;">
+                                <i class="fas fa-clock me-1"></i> Año
+                            </label>
                             <select name="anio" class="form-select border-secondary-subtle">
                                 <?php 
                                 $anio_base = 2024;
@@ -138,12 +198,27 @@ $meses = [
                         </div>
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-dark w-100 fw-bold">
-                                <i class="fas fa-filter me-1"></i> Filtrar Período
+                                <i class="fas fa-filter me-1"></i> Filtrar
                             </button>
                         </div>
                         <div class="col text-end">
                             <span class="badge bg-secondary p-2 fs-6 text-uppercase fw-semibold">
-                                Período: <?php echo $meses[$mes_actual] . " " . $anio_actual; ?>
+                                <i class="fas fa-calendar-check me-1"></i>
+                                <?php echo $meses[$mes_actual] . " " . $anio_actual; ?>
+                                <?php if ($id_empresa_filtro): ?>
+                                    <?php 
+                                    $nombre_emp = '';
+                                    foreach ($empresas as $emp) {
+                                        if ($emp['id_empresa'] == $id_empresa_filtro) {
+                                            $nombre_emp = $emp['nombre_empresa'];
+                                            break;
+                                        }
+                                    }
+                                    ?>
+                                    <span class="ms-2 text-warning">| <i class="fas fa-building"></i> <?php echo htmlspecialchars($nombre_emp); ?></span>
+                                <?php else: ?>
+                                    <span class="ms-2 text-info">| <i class="fas fa-globe"></i> Todas</span>
+                                <?php endif; ?>
                             </span>
                         </div>
                     </form>
@@ -169,8 +244,8 @@ $meses = [
                     
                     <!-- ================= TABLA DE VENTAS ================= -->
                     <div id="contenedorVentas" class="table-wrapper">
-                        <table id='tabla2' class="table table-hover table-bordered shadow-sm">
-                                    <thead class="table-dark">
+                        <table class="table table-hover table-bordered shadow-sm">
+                            <thead class="table-dark">
                                 <tr>
                                     <th style="width: 70px;">ID</th>
                                     <th>Fecha</th>
@@ -183,7 +258,7 @@ $meses = [
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody class='table-group-divider'>
+                            <tbody class="table-group-divider">
                                 <?php 
                                 $total_base_ventas = 0;
                                 $total_exento_ventas = 0;
@@ -204,7 +279,7 @@ $meses = [
                                                 <span style="display:block; font-weight: bold;"><?php echo $v['nro_factura']; ?></span>
                                                 <small style="color: #64748b;">Ctrl: <?php echo $v['nro_control']; ?></small>
                                             </td>
-                                            <td><?php echo htmlspecialchars($v['nombre_empresa']); ?></td>
+                                            <td><?php echo htmlspecialchars($v['nombre_empresa'] ?? 'N/A'); ?></td>
                                             <td><?php echo number_format($v['base_imponible'], 2); ?> Bs.</td>
                                             <td><?php echo number_format($v['monto_exento'], 2); ?> Bs.</td>
                                             <td class="text-success fw-semibold">+<?php echo number_format($v['monto_iva'], 2); ?> Bs.</td>
@@ -217,7 +292,13 @@ $meses = [
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="9" style="text-align:center; padding: 20px; color: #94a3b8;">No hay operaciones de ventas en este período.</td>
+                                        <td colspan="9" class="sin-datos">
+                                            <?php if ($id_empresa_filtro): ?>
+                                                No hay operaciones de ventas para esta empresa en el período seleccionado.
+                                            <?php else: ?>
+                                                No hay operaciones de ventas en este período.
+                                            <?php endif; ?>
+                                        </td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -238,8 +319,8 @@ $meses = [
 
                     <!-- ================= TABLA DE COMPRAS ================= -->
                     <div id="contenedorCompras" class="table-wrapper d-none">
-                        <table id='tabla' class="table table-hover table-bordered shadow-sm">
-                                    <thead class="table-dark">
+                        <table class="table table-hover table-bordered shadow-sm">
+                            <thead class="table-dark">
                                 <tr>
                                     <th style="width: 70px;">ID</th>
                                     <th>Fecha</th>
@@ -252,7 +333,7 @@ $meses = [
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody class='table-group-divider'>
+                            <tbody class="table-group-divider">
                                 <?php 
                                 $total_base_compras = 0;
                                 $total_iva_compras = 0;
@@ -278,7 +359,7 @@ $meses = [
                                                     </small>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?php echo htmlspecialchars($c['nombre_proveedor']); ?></td>
+                                            <td><?php echo htmlspecialchars($c['nombre_proveedor'] ?? 'N/A'); ?></td>
                                             <td><?php echo number_format($c['base_imponible'], 2); ?> Bs.</td>
                                             <td class="text-danger fw-semibold">+<?php echo number_format($c['monto_iva'], 2); ?> Bs.</td>
                                             <td class="text-primary fw-bold" style="background: #f0fdf4;"><?php echo number_format($c['monto_exento'], 2); ?> Bs.</td>
@@ -291,7 +372,13 @@ $meses = [
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="9" style="text-align:center; padding: 20px; color: #94a3b8;">No hay operaciones de compras en este período.</td>
+                                        <td colspan="9" class="sin-datos">
+                                            <?php if ($id_empresa_filtro): ?>
+                                                No hay operaciones de compras para esta empresa en el período seleccionado.
+                                            <?php else: ?>
+                                                No hay operaciones de compras en este período.
+                                            <?php endif; ?>
+                                        </td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -315,7 +402,9 @@ $meses = [
         </main>
     </div>
 
-    <!-- Modales permanecen intactos -->
+    <!-- ============================================ -->
+    <!-- MODAL DE REGISTRO DE FACTURA                 -->
+    <!-- ============================================ -->
     <div class="modal fade" id="modalRegistro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
@@ -347,8 +436,9 @@ $meses = [
                                 <select name="id_empresa" id="id_empresa" class="form-select border-success">
                                     <option value="">Seleccione...</option>
                                     <?php
-                                    $empresas = obtenerEmpresasParaFactura($conexion);
-                                    while ($emp = $empresas->fetch_assoc()):
+                                    // Consulta directa (corregida)
+                                    $empresas_modal = mysqli_query($conexion, "SELECT id_empresa, nombre_empresa FROM empresas_clientes WHERE estado_activo = '1' ORDER BY nombre_empresa ASC");
+                                    while ($emp = $empresas_modal->fetch_assoc()):
                                     ?>
                                         <option value="<?php echo $emp['id_empresa']; ?>"><?php echo $emp['nombre_empresa']; ?></option>
                                     <?php endwhile; ?>
@@ -426,6 +516,65 @@ $meses = [
     </div>
 
     <?php include('script.php'); ?>
-</body>
 
+    <script>
+        // ============================================
+        // FUNCIÓN PARA CAMBIAR ENTRE PESTAÑAS
+        // ============================================
+        function cambiarLibro(tipo) {
+            if (tipo === 'VENTAS') {
+                document.getElementById('contenedorVentas').classList.remove('d-none');
+                document.getElementById('contenedorCompras').classList.add('d-none');
+                document.getElementById('btnTabVentas').classList.add('active-tab');
+                document.getElementById('btnTabCompras').classList.remove('active-tab');
+            } else {
+                document.getElementById('contenedorVentas').classList.add('d-none');
+                document.getElementById('contenedorCompras').classList.remove('d-none');
+                document.getElementById('btnTabCompras').classList.add('active-tab');
+                document.getElementById('btnTabVentas').classList.remove('active-tab');
+            }
+        }
+
+        // ============================================
+        // FUNCIONES PARA EL MODAL
+        // ============================================
+        function alternarTerceros() {
+            var tipo = document.getElementById('tipo_transaccion').value;
+            if (tipo === 'VENTA') {
+                document.getElementById('grupo_cliente').classList.remove('d-none');
+                document.getElementById('grupo_proveedor').classList.add('d-none');
+                document.getElementById('grupo_comprobante').classList.add('d-none');
+            } else {
+                document.getElementById('grupo_cliente').classList.add('d-none');
+                document.getElementById('grupo_proveedor').classList.remove('d-none');
+                document.getElementById('grupo_comprobante').classList.remove('d-none');
+            }
+        }
+
+        function limpiarFormularioNuevaFactura() {
+            document.getElementById('formFactura').reset();
+            document.getElementById('edit_id_factura').value = '';
+            document.getElementById('iva_modal').value = '0.00';
+            document.getElementById('iva_total_visual').value = '0.00';
+            document.getElementById('total_modal_hidden').value = '0.00';
+            alternarTerceros();
+        }
+
+        function calcularTotalesModal() {
+            var base = parseFloat(document.getElementById('base_modal').value) || 0;
+            var exento = parseFloat(document.getElementById('exento_modal').value) || 0;
+            var iva = base * 0.16;
+            var total = base + exento + iva;
+            
+            document.getElementById('iva_modal').value = iva.toFixed(2);
+            document.getElementById('iva_total_visual').value = total.toFixed(2) + ' Bs.';
+            document.getElementById('total_modal_hidden').value = total.toFixed(2);
+        }
+
+        function editarFactura(id) {
+            alert('Función de edición en desarrollo');
+        }
+    </script>
+
+</body>
 </html>

@@ -1,15 +1,28 @@
 <?php
-// ============================================
-// 1. PRIMERO: Incluir sesión y conexión
-// ============================================
 include_once '../BACKEND/conexion_login.php';
+include_once '../BACKEND/consulta_factura.php';
 
-// 2. Verificar autenticación
 if (!isset($_SESSION['usuario'])) {
     header("Location: ../VIEWS/index.php");
     exit();
 }
+
+// Obtener datos de pagos
+$empresas_pago = obtenerEstadoPagos($conexion);
+
+// Contar estadísticas
+$total_empresas = count($empresas_pago);
+$pagadas = 0;
+$vencidas = 0;
+$pendientes = 0;
+
+foreach ($empresas_pago as $emp) {
+    if ($emp['estado_pago'] == 'pagado') $pagadas++;
+    elseif ($emp['estado_pago'] == 'vencido') $vencidas++;
+    else $pendientes++;
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -20,7 +33,6 @@ if (!isset($_SESSION['usuario'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="../JAVASCRIPT/bootstrap.bundle.min.js"></script>
     <style>
-        /* Estilos solo para el contenido */
         .welcome-section {
             padding: 30px 20px;
         }
@@ -89,6 +101,7 @@ if (!isset($_SESSION['usuario'])) {
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
         }
 
         .quick-actions h4 {
@@ -176,12 +189,148 @@ if (!isset($_SESSION['usuario'])) {
         .date-badge i {
             margin-right: 8px;
         }
+
+        /* ============================================ */
+        /* ESTILOS PARA EL PANEL DE PAGOS               */
+        /* ============================================ */
+        .pagos-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .pagos-card h4 {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .pagos-card h4 i {
+            color: #10b981;
+            margin-right: 10px;
+        }
+
+        .stat-pago-box {
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-pago-box:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-pago-box .numero {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-pago-box .label {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .stat-pago-box.pagado {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+        .stat-pago-box.pagado .numero { color: #166534; }
+
+        .stat-pago-box.pendiente {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+        }
+        .stat-pago-box.pendiente .numero { color: #92400e; }
+
+        .stat-pago-box.vencido {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+        }
+        .stat-pago-box.vencido .numero { color: #991b1b; }
+
+        .empresa-pago-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 10px;
+            background: #f8fafc;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .empresa-pago-item:hover {
+            background: #f1f5f9;
+        }
+
+        .empresa-pago-item .nombre {
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .empresa-pago-item .rif {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-left: 10px;
+        }
+
+        .empresa-pago-item .estado {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 12px;
+            border-radius: 30px;
+        }
+
+        .estado-pagado {
+            background: #bbf7d0;
+            color: #166534;
+        }
+        .estado-pendiente {
+            background: #fde68a;
+            color: #92400e;
+        }
+        .estado-vencido {
+            background: #fca5a5;
+            color: #991b1b;
+        }
+
+        .empresa-pago-item .fechas {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        .empresa-pago-item .monto {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.85rem;
+        }
+
+        .scroll-pagos {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .scroll-pagos::-webkit-scrollbar {
+            width: 4px;
+        }
+        .scroll-pagos::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        .scroll-pagos::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
         
-        <!-- Sidebar -->
+        <!-- Sidebar (igual que antes) -->
         <aside class="main-sidebar">
             <div class="brand"><img src="../IMG/logo_empresa-sinfondo.png" alt="#" class="mi-imagen"></div>
             <nav class="menu">
@@ -205,7 +354,9 @@ if (!isset($_SESSION['usuario'])) {
 
             <div class="main-content">
                 
-                <!-- Mensaje de Bienvenida -->
+                <!-- ============================================ -->
+                <!-- MENSAJE DE BIENVENIDA                        -->
+                <!-- ============================================ -->
                 <div class="welcome-card">
                     <i class="fas fa-chart-line icon-decoration"></i>
                     <h1>¡Bienvenido al Sistema Contable!</h1>
@@ -215,7 +366,87 @@ if (!isset($_SESSION['usuario'])) {
                     </span>
                 </div>
 
-                <!-- Accesos Rápidos -->
+                <!-- ============================================ -->
+                <!-- PANEL DE ESTADO DE PAGOS                     -->
+                <!-- ============================================ -->
+                <div class="pagos-card">
+                    <h4><i class="fas fa-hand-holding-usd"></i> Estado de Pagos - Servicios Contables</h4>
+                    
+                    <!-- Estadísticas rápidas -->
+                    <div class="row mb-4">
+                        <div class="col-4">
+                            <div class="stat-pago-box pagado">
+                                <div class="numero"><?php echo $pagadas; ?></div>
+                                <div class="label"><i class="fas fa-check-circle text-success"></i> Pagadas</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-pago-box pendiente">
+                                <div class="numero"><?php echo $pendientes; ?></div>
+                                <div class="label"><i class="fas fa-clock text-warning"></i> Pendientes</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-pago-box vencido">
+                                <div class="numero"><?php echo $vencidas; ?></div>
+                                <div class="label"><i class="fas fa-exclamation-circle text-danger"></i> Vencidas</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de empresas -->
+                    <div class="scroll-pagos">
+                        <?php if (!empty($empresas_pago)): ?>
+                            <?php foreach ($empresas_pago as $emp): ?>
+                                <?php
+                                $estado = $emp['estado_pago'];
+                                $clase_estado = '';
+                                $texto_estado = '';
+                                $color_borde = '';
+
+                                if ($estado == 'pagado') {
+                                    $clase_estado = 'estado-pagado';
+                                    $texto_estado = '✅ Pagado';
+                                    $color_borde = '#22c55e';
+                                } elseif ($estado == 'vencido') {
+                                    $clase_estado = 'estado-vencido';
+                                    $texto_estado = '⚠️ Vencido';
+                                    $color_borde = '#ef4444';
+                                } else {
+                                    $clase_estado = 'estado-pendiente';
+                                    $texto_estado = '⏳ Pendiente';
+                                    $color_borde = '#f59e0b';
+                                }
+                                ?>
+                                <div class="empresa-pago-item" style="border-left-color: <?php echo $color_borde; ?>;">
+                                    <div>
+                                        <span class="nombre"><?php echo htmlspecialchars($emp['nombre_empresa']); ?></span>
+                                        <span class="rif"><?php echo htmlspecialchars($emp['rif']); ?></span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="fechas">
+                                            <i class="fas fa-calendar-alt"></i> 
+                                            <?php echo $emp['fecha_ultimo_pago'] ? date('d/m/Y', strtotime($emp['fecha_ultimo_pago'])) : 'N/A'; ?>
+                                            <i class="fas fa-arrow-right mx-1"></i>
+                                            <?php echo $emp['fecha_proximo_pago'] ? date('d/m/Y', strtotime($emp['fecha_proximo_pago'])) : 'N/A'; ?>
+                                        </span>
+                                        <span class="monto">Bs. <?php echo number_format($emp['monto_servicio'], 2); ?></span>
+                                        <span class="estado <?php echo $clase_estado; ?>"><?php echo $texto_estado; ?></span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-inbox fa-2x d-block mb-2" style="color: #cbd5e1;"></i>
+                                No hay empresas registradas
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- ACCESOS RÁPIDOS                              -->
+                <!-- ============================================ -->
                 <div class="quick-actions">
                     <h4><i class="fas fa-bolt"></i> Accesos Rápidos</h4>
                     <div class="grid-actions">
