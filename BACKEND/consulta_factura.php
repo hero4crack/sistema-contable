@@ -56,4 +56,38 @@ function obtenerLibroFacturas($conexion, $mes = null, $anio = null, $id_empresa 
     $resultado = $conexion->query($sql);
     return $resultado;
 }
+
+
+
+// ============================================================
+// FUNCIÓN PARA OBTENER ESTADO DE PAGOS
+// ============================================================
+function obtenerEstadoPagos($conexion) {
+    $sql = "SELECT 
+                id_empresa,
+                nombre_empresa,
+                rif,
+                servicio_activo,
+                fecha_ultimo_pago,
+                fecha_proximo_pago,
+                monto_servicio,
+                CASE 
+                    WHEN servicio_activo = 1 AND (fecha_proximo_pago IS NULL OR fecha_proximo_pago >= CURDATE()) THEN 'pagado'
+                    WHEN servicio_activo = 1 AND fecha_proximo_pago < CURDATE() THEN 'vencido'
+                    ELSE 'pendiente'
+                END as estado_pago
+            FROM empresas_clientes 
+            WHERE estado_activo = 1
+            ORDER BY nombre_empresa ASC";
+    
+    $resultado = $conexion->query($sql);
+    $empresas = [];
+    while ($row = $resultado->fetch_assoc()) {
+        $empresas[] = $row;
+    }
+    return $empresas;
+}
+
+
+
 ?>
