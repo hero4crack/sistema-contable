@@ -32,7 +32,7 @@ if (isset($_GET["iniciar"])) {
     if ($numero_registro != 0) {
         // Guardar datos en sesión
         $_SESSION['rol'] = $fila3["rol"];
-        $_SESSION['usuario'] = $fila3["nombre_usuario"]; // Cambié 'username' por 'nombre_usuario'
+        $_SESSION['usuario'] = $fila3["nombre_usuario"];
 
         // Redirigir con JavaScript
         echo "<script type='text/javascript'>";

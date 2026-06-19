@@ -1,51 +1,43 @@
 <?php
-include_once '../BACKEND/conexion_login.php';
-include_once '../BACKEND/consulta_factura.php';
+require_once '../BACKEND/conecxion_bd.php';
+require_once '../BACKEND/consulta_mayor.php';
 
-if (!isset($_SESSION['usuario'])) {
-    header("Location: ../VIEWS/index.php");
-    exit();
+// ============================================
+// 1. OBTENER EMPRESAS PARA EL SELECTOR
+// ============================================
+$query_empresas = "SELECT id_empresa, nombre_empresa, rif FROM empresas_clientes WHERE estado_activo = 1 ORDER BY nombre_empresa ASC";
+$result_empresas = mysqli_query($conexion, $query_empresas);
+$empresas = [];
+while ($row = mysqli_fetch_assoc($result_empresas)) {
+    $empresas[] = $row;
 }
 
-// Procesar registro de pago
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['registrar_pago'])) {
-    $id_empresa = $_POST['id_empresa'];
-    $monto = $_POST['monto_servicio'];
-    $fecha_pago = $_POST['fecha_pago'];
-    $fecha_vencimiento = $_POST['fecha_vencimiento'];
-    
-    $sql = "UPDATE empresas_clientes 
-            SET servicio_activo = 1,
-                fecha_ultimo_pago = '$fecha_pago',
-                fecha_proximo_pago = '$fecha_vencimiento',
-                monto_servicio = '$monto'
-            WHERE id_empresa = '$id_empresa'";
-    
-    if ($conexion->query($sql)) {
-        echo "<script>
-            alert('✅ Pago registrado exitosamente.');
-            window.location.href = 'pagos_servicio.php';
-        </script>";
-    } else {
-        echo "<script>
-            alert('❌ Error al registrar el pago: " . $conexion->error . "');
-        </script>";
+// ============================================
+// 2. CAPTURAR FILTROS
+// ============================================
+$id_empresa_filtro = isset($_GET['id_empresa']) ? $_GET['id_empresa'] : '';
+
+// ============================================
+// 3. OBTENER DATOS DEL LIBRO MAYOR
+// ============================================
+$saldos = obtenerLibroMayor($conexion, $id_empresa_filtro);
+
+// Variables para totales
+$total_debe = 0;
+$total_haber = 0;
+$total_saldo = 0;
+$contador = 0;
+
+// Guardar datos en array para procesar
+$datos = [];
+if ($saldos && $saldos->num_rows > 0) {
+    while ($row = $saldos->fetch_assoc()) {
+        $datos[] = $row;
+        $total_debe += $row['total_debe'];
+        $total_haber += $row['total_haber'];
+        $total_saldo += $row['saldo'];
+        $contador++;
     }
-}
-
-// Obtener datos de pagos
-$empresas_pago = obtenerEstadoPagos($conexion);
-
-// Contar estadísticas
-$total_empresas = count($empresas_pago);
-$pagadas = 0;
-$vencidas = 0;
-$pendientes = 0;
-
-foreach ($empresas_pago as $emp) {
-    if ($emp['estado_pago'] == 'pagado') $pagadas++;
-    elseif ($emp['estado_pago'] == 'vencido') $vencidas++;
-    else $pendientes++;
 }
 ?>
 
@@ -53,139 +45,168 @@ foreach ($empresas_pago as $emp) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Pagos de Servicio | Contable EA</title>
+    <title>Libro Mayor | Contable EA</title>
     <link rel="stylesheet" href="../CSS/bootstrap.min.css">
     <link rel="stylesheet" href="../CSS/style_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="../JAVASCRIPT/bootstrap.bundle.min.js"></script>
     <style>
-        .stat-pago-box {
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        .stat-pago-box:hover {
-            transform: translateY(-3px);
-        }
-        .stat-pago-box .numero {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-        .stat-pago-box .label {
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-        .stat-pago-box.pagado {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-        }
-        .stat-pago-box.pagado .numero { color: #166534; }
-        .stat-pago-box.pendiente {
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-        }
-        .stat-pago-box.pendiente .numero { color: #92400e; }
-        .stat-pago-box.vencido {
-            background: #fef2f2;
-            border: 1px solid #fca5a5;
-        }
-        .stat-pago-box.vencido .numero { color: #991b1b; }
-
-        .empresa-pago-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            border-radius: 10px;
+        /* Estilos generales */
+        .filter-box {
             background: #f8fafc;
-            margin-bottom: 8px;
-            transition: all 0.3s;
-            border-left: 4px solid transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
-        .empresa-pago-item:hover {
-            background: #f1f5f9;
-        }
-        .empresa-pago-item .nombre {
-            font-weight: 600;
+        
+        .empresa-selector {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-weight: 500;
             color: #1e293b;
-            min-width: 200px;
         }
-        .empresa-pago-item .rif {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-left: 10px;
+        .empresa-selector:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
         }
-        .empresa-pago-item .estado {
-            font-size: 0.75rem;
+        
+        .card-mayor {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .card-mayor .card-header {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 18px 25px;
+            border-bottom: none;
+        }
+        
+        .card-mayor .card-header h3 {
             font-weight: 600;
-            padding: 4px 14px;
+        }
+        
+        .table-mayor {
+            margin-bottom: 0;
+        }
+        
+        .table-mayor thead th {
+            background: #f1f5f9;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 15px;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        
+        .table-mayor tbody td {
+            padding: 10px 15px;
+            vertical-align: middle;
+        }
+        
+        .table-mayor tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        .table-mayor tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Totales footer */
+        .totales-footer {
+            background: #f1f5f9 !important;
+            font-weight: 700;
+            border-top: 3px double #cbd5e1 !important;
+        }
+        
+        .totales-footer td {
+            padding: 12px 15px !important;
+            font-size: 0.9rem;
+        }
+        
+        /* Badges de estado */
+        .badge-estado {
+            padding: 5px 15px;
             border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.7rem;
+            min-width: 80px;
+            display: inline-block;
+            text-align: center;
         }
-        .estado-pagado {
-            background: #bbf7d0;
-            color: #166534;
+        
+        .badge-deudor {
+            background: #dbeafe;
+            color: #1e40af;
         }
-        .estado-pendiente {
-            background: #fde68a;
-            color: #92400e;
-        }
-        .estado-vencido {
-            background: #fca5a5;
+        
+        .badge-acreedor {
+            background: #fecaca;
             color: #991b1b;
         }
-        .empresa-pago-item .fechas {
-            font-size: 0.8rem;
-            color: #64748b;
+        
+        .badge-saldada {
+            background: #e5e7eb;
+            color: #4b5563;
         }
-        .empresa-pago-item .monto {
-            font-weight: 700;
-            color: #1e293b;
-            font-size: 0.9rem;
-            min-width: 100px;
-            text-align: right;
+        
+        /* Sin datos */
+        .sin-datos {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
         }
-        .btn-registrar {
-            background: #10b981;
-            color: white;
-            border: none;
+        
+        .sin-datos i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+        }
+        
+        /* Scroll responsive */
+        .table-wrapper {
+            overflow-x: auto;
+            padding: 0 5px;
+        }
+        
+        /* Total general en el header */
+        .total-badge {
+            background: rgba(255,255,255,0.15);
             padding: 5px 15px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+        
+        .total-badge i {
+            margin-right: 5px;
+        }
+        
+        /* Info empresa seleccionada */
+        .empresa-info {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
             border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            transition: all 0.3s;
+            padding: 8px 15px;
+            color: #166534;
+            font-size: 0.85rem;
         }
-        .btn-registrar:hover {
-            background: #059669;
-            color: white;
-            transform: scale(1.05);
+        
+        .empresa-info i {
+            margin-right: 8px;
+            color: #10b981;
         }
+        
         .main-content {
             padding: 20px 25px;
-        }
-        .card-pagos {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-        }
-        .btn-volver {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 10px;
-            font-weight: 500;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-volver:hover {
-            background: #5a6fd6;
-            color: white;
-            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -201,13 +222,12 @@ foreach ($empresas_pago as $emp) {
                 <a href="../VIEWS/registro_proveedor.php"><i class="fas fa-truck"></i> Proveedores</a>
                 <a href="../VIEWS/libro_facturas.php"><i class="fas fa-file-invoice"></i> Libro de Facturas</a>
                 <a href="../VIEWS/asientos_diario.php"><i class="fas fa-book"></i> Asientos Diario</a>
-                <a href="../VIEWS/libro_mayor.php"><i class="fas fa-chart-line"></i> Libro Mayor</a>
+                <a href="../VIEWS/libro_mayor.php" class="active"><i class="fas fa-chart-line"></i> Libro Mayor</a>
                 <a href="../VIEWS/balance_comprobacion.php"><i class="fas fa-balance-scale"></i> Balance</a>
                 <a href="../VIEWS/estado_resultados.php"><i class="fas fa-file-invoice-dollar"></i> Estado de Resultados</a>
                 <a href="../VIEWS/empleados.php"><i class="fas fa-users"></i> Empleados</a>
                 <a href="../VIEWS/catalogo_cuenta.php"><i class="fas fa-list-ol"></i> Catálogo Cuentas</a>
                 <a href="../VIEWS/auditoria.php"><i class="fas fa-shield-alt"></i> Auditoría</a>
-                <a href="../VIEWS/pagos_servicio.php" class="active"><i class="fas fa-hand-holding-usd"></i> Pagos Servicio</a>
             </nav>
         </aside>
 
@@ -217,101 +237,176 @@ foreach ($empresas_pago as $emp) {
 
             <div class="main-content">
                 
-                <!-- Encabezado -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3><i class="fas fa-hand-holding-usd text-success me-2"></i>Pagos de Servicio Contable</h3>
-                    <a href="inicio.php" class="btn-volver">
-                        <i class="fas fa-arrow-left"></i> Volver al Inicio
-                    </a>
-                </div>
+                <!-- ============================================ -->
+                <!-- FILTROS                                      -->
+                <!-- ============================================ -->
+                <div class="filter-box">
+                    <form method="GET" action="libro_mayor.php" class="row align-items-end g-2">
+                        
+                        <!-- Selector de Empresa -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;">
+                                <i class="fas fa-building me-1"></i> Empresa
+                            </label>
+                            <select name="id_empresa" class="form-select empresa-selector">
+                                <option value="">Todas las empresas</option>
+                                <?php foreach ($empresas as $emp): ?>
+                                    <option value="<?php echo $emp['id_empresa']; ?>" 
+                                        <?php echo ($id_empresa_filtro == $emp['id_empresa']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($emp['nombre_empresa']); ?> 
+                                        (<?php echo htmlspecialchars($emp['rif']); ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
-                <!-- Estadísticas rápidas -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="stat-pago-box pagado">
-                            <div class="numero"><?php echo $pagadas; ?></div>
-                            <div class="label"><i class="fas fa-check-circle text-success"></i> Pagadas</div>
+                        <!-- Botón Filtrar -->
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-dark w-100 fw-bold">
+                                <i class="fas fa-filter me-1"></i> Filtrar
+                            </button>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-pago-box pendiente">
-                            <div class="numero"><?php echo $pendientes; ?></div>
-                            <div class="label"><i class="fas fa-clock text-warning"></i> Pendientes</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-pago-box vencido">
-                            <div class="numero"><?php echo $vencidas; ?></div>
-                            <div class="label"><i class="fas fa-exclamation-circle text-danger"></i> Vencidas</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-pago-box" style="background: #eff6ff; border: 1px solid #93c5fd;">
-                            <div class="numero" style="color: #1e40af;"><?php echo $total_empresas; ?></div>
-                            <div class="label"><i class="fas fa-building text-primary"></i> Total Empresas</div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Lista de empresas -->
-                <div class="card-pagos">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Empresas y su Estado de Pago</h5>
-                        <button class="btn btn-success" style="background: #10b981; border: none; padding: 8px 20px; border-radius: 10px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#modalRegistroPago">
-                            <i class="fas fa-plus-circle me-1"></i> Registrar Pago
-                        </button>
-                    </div>
-                    
-                    <div style="max-height: 500px; overflow-y: auto;">
-                        <?php if (!empty($empresas_pago)): ?>
-                            <?php foreach ($empresas_pago as $emp): ?>
-                                <?php
-                                $estado = $emp['estado_pago'];
-                                $clase_estado = '';
-                                $texto_estado = '';
-                                $color_borde = '';
-
-                                if ($estado == 'pagado') {
-                                    $clase_estado = 'estado-pagado';
-                                    $texto_estado = '✅ Pagado';
-                                    $color_borde = '#22c55e';
-                                } elseif ($estado == 'vencido') {
-                                    $clase_estado = 'estado-vencido';
-                                    $texto_estado = '⚠️ Vencido';
-                                    $color_borde = '#ef4444';
-                                } else {
-                                    $clase_estado = 'estado-pendiente';
-                                    $texto_estado = '⏳ Pendiente';
-                                    $color_borde = '#f59e0b';
+                        <!-- Información -->
+                        <div class="col text-end">
+                            <?php if ($id_empresa_filtro): ?>
+                                <?php 
+                                $nombre_emp = '';
+                                foreach ($empresas as $emp) {
+                                    if ($emp['id_empresa'] == $id_empresa_filtro) {
+                                        $nombre_emp = $emp['nombre_empresa'];
+                                        break;
+                                    }
                                 }
                                 ?>
-                                <div class="empresa-pago-item" style="border-left-color: <?php echo $color_borde; ?>;">
-                                    <div>
-                                        <span class="nombre"><?php echo htmlspecialchars($emp['nombre_empresa']); ?></span>
-                                        <span class="rif"><?php echo htmlspecialchars($emp['rif']); ?></span>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-4">
-                                        <span class="fechas">
-                                            <i class="fas fa-calendar-alt"></i> 
-                                            Último: <?php echo $emp['fecha_ultimo_pago'] ? date('d/m/Y', strtotime($emp['fecha_ultimo_pago'])) : 'N/A'; ?>
-                                            <i class="fas fa-arrow-right mx-1"></i>
-                                            Vence: <?php echo $emp['fecha_proximo_pago'] ? date('d/m/Y', strtotime($emp['fecha_proximo_pago'])) : 'N/A'; ?>
+                                <span class="empresa-info">
+                                    <i class="fas fa-building"></i> 
+                                    Mostrando: <strong><?php echo htmlspecialchars($nombre_emp); ?></strong>
+                                </span>
+                            <?php else: ?>
+                                <span class="empresa-info" style="background: #eff6ff; border-color: #93c5fd; color: #1e40af;">
+                                    <i class="fas fa-globe"></i> Mostrando: <strong>Todas las empresas</strong>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- TABLA DEL LIBRO MAYOR                        -->
+                <!-- ============================================ -->
+                <div class="card card-mayor">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i> Libro Mayor
+                        </h3>
+                        <div class="d-flex gap-2 align-items-center">
+                            <span class="total-badge">
+                                <i class="fas fa-calendar-alt"></i> <?php echo date('d/m/Y'); ?>
+                            </span>
+                            <span class="total-badge">
+                                <i class="fas fa-file-invoice"></i> <?php echo $contador; ?> cuentas
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table class="table table-mayor">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">#</th>
+                                    <th>Código</th>
+                                    <th>Cuenta Contable</th>
+                                    <th class="text-end">Total Debe</th>
+                                    <th class="text-end">Total Haber</th>
+                                    <th class="text-end">Saldo Final</th>
+                                    <th class="text-center">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($datos)): ?>
+                                    <?php 
+                                    $fila = 1;
+                                    foreach ($datos as $row): 
+                                        $saldo = $row['saldo'];
+                                        
+                                        if ($saldo > 0) {
+                                            $textoSaldo = "DEUDOR";
+                                            $claseBadge = "badge-deudor";
+                                            $claseMonto = "text-primary fw-bold";
+                                        } elseif ($saldo < 0) {
+                                            $textoSaldo = "ACREEDOR";
+                                            $claseBadge = "badge-acreedor";
+                                            $claseMonto = "text-danger fw-bold";
+                                        } else {
+                                            $textoSaldo = "SALDADA";
+                                            $claseBadge = "badge-saldada";
+                                            $claseMonto = "text-muted";
+                                        }
+                                    ?>
+                                        <tr>
+                                            <td class="text-center text-muted"><?php echo $fila; ?></td>
+                                            <td class="fw-bold"><?php echo htmlspecialchars($row['codigo_cuenta'] ?? 'N/A'); ?></td>
+                                            <td><?php echo htmlspecialchars($row['nombre_cuenta'] ?? 'Sin nombre'); ?></td>
+                                            <td class="text-end text-success fw-semibold">
+                                                Bs. <?php echo number_format($row['total_debe'] ?? 0, 2, ',', '.'); ?>
+                                            </td>
+                                            <td class="text-end text-danger fw-semibold">
+                                                Bs. <?php echo number_format($row['total_haber'] ?? 0, 2, ',', '.'); ?>
+                                            </td>
+                                            <td class="text-end <?php echo $claseMonto; ?>">
+                                                Bs. <?php echo number_format(abs($saldo), 2, ',', '.'); ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge-estado <?php echo $claseBadge; ?>">
+                                                    <?php echo $textoSaldo; ?>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    <?php 
+                                        $fila++;
+                                        endforeach; 
+                                    ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="sin-datos">
+                                                <i class="fas fa-inbox"></i>
+                                                <?php if ($id_empresa_filtro): ?>
+                                                    No hay movimientos contables para esta empresa.
+                                                <?php else: ?>
+                                                    No hay movimientos contables registrados en el sistema.
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                            <?php if (!empty($datos)): ?>
+                            <tfoot class="totales-footer">
+                                <tr>
+                                    <td colspan="3" class="text-end text-uppercase">
+                                        <i class="fas fa-calculator me-2"></i> TOTALES GENERALES:
+                                    </td>
+                                    <td class="text-end text-success fw-bold">
+                                        Bs. <?php echo number_format($total_debe, 2, ',', '.'); ?>
+                                    </td>
+                                    <td class="text-end text-danger fw-bold">
+                                        Bs. <?php echo number_format($total_haber, 2, ',', '.'); ?>
+                                    </td>
+                                    <td class="text-end fw-bold" style="color: #1e293b;">
+                                        Bs. <?php echo number_format($total_saldo, 2, ',', '.'); ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-secondary">
+                                            <?php echo $contador; ?> cuentas
                                         </span>
-                                        <span class="monto">Bs. <?php echo number_format($emp['monto_servicio'], 2); ?></span>
-                                        <span class="estado <?php echo $clase_estado; ?>"><?php echo $texto_estado; ?></span>
-                                        <button class="btn-registrar" data-bs-toggle="modal" data-bs-target="#modalRegistroPago" 
-                                                onclick="cargarEmpresa(<?php echo $emp['id_empresa']; ?>, '<?php echo htmlspecialchars($emp['nombre_empresa']); ?>', <?php echo $emp['monto_servicio']; ?>)">
-                                            <i class="fas fa-edit"></i> Registrar
-                                        </button>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="text-center text-muted py-4">
-                                <i class="fas fa-inbox fa-3x d-block mb-3" style="color: #cbd5e1;"></i>
-                                No hay empresas registradas
-                            </div>
-                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                            <?php endif; ?>
+                        </table>
                     </div>
                 </div>
 
@@ -319,87 +414,6 @@ foreach ($empresas_pago as $emp) {
         </main>
     </div>
 
-    <!-- ============================================ -->
-    <!-- MODAL PARA REGISTRAR PAGO                    -->
-    <!-- ============================================ -->
-    <div class="modal fade" id="modalRegistroPago" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-                <div class="modal-header" style="background: linear-gradient(135deg, #1e293b, #334155); color: white; border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title">
-                        <i class="fas fa-hand-holding-usd me-2" style="color: #34d399;"></i> 
-                        Registrar Pago de Servicio
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="POST" action="">
-                    <div class="modal-body" style="padding: 25px;">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-secondary">Empresa</label>
-                            <select name="id_empresa" id="modal_id_empresa" class="form-select" required>
-                                <option value="">Seleccione una empresa...</option>
-                                <?php foreach ($empresas_pago as $emp): ?>
-                                    <option value="<?php echo $emp['id_empresa']; ?>">
-                                        <?php echo htmlspecialchars($emp['nombre_empresa']); ?> 
-                                        (<?php echo htmlspecialchars($emp['rif']); ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-secondary">Monto del Servicio (Bs.)</label>
-                            <input type="number" step="0.01" min="0" name="monto_servicio" id="modal_monto" class="form-control" placeholder="0.00" required value="100.00">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-secondary">Fecha de Pago</label>
-                            <input type="date" name="fecha_pago" id="modal_fecha_pago" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-secondary">Fecha de Vencimiento (Próximo Pago)</label>
-                            <input type="date" name="fecha_vencimiento" id="modal_fecha_vencimiento" class="form-control" value="<?php echo date('Y-m-d', strtotime('+1 month')); ?>" required>
-                            <small class="text-muted"><i class="fas fa-info-circle"></i> El servicio estará activo hasta esta fecha</small>
-                        </div>
-                        
-                        <div class="alert alert-info" style="background: #f0fdf4; border-color: #bbf7d0; color: #166534; font-size: 0.85rem;">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Al registrar el pago, la empresa quedará con servicio activo hasta la fecha de vencimiento seleccionada.
-                        </div>
-                    </div>
-                    <div class="modal-footer" style="background: #f8fafc; border-radius: 0 0 15px 15px;">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" name="registrar_pago" class="btn btn-success" style="background: #10b981; border: none; padding: 10px 25px; font-weight: bold;">
-                            <i class="fas fa-save me-1"></i> Registrar Pago
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <?php include('script.php'); ?>
-
-    <script>
-        // Función para cargar empresa en el modal
-        function cargarEmpresa(id, nombre, monto) {
-            document.getElementById('modal_id_empresa').value = id;
-            document.getElementById('modal_monto').value = monto || 100.00;
-        }
-
-        // Actualizar fecha de vencimiento automáticamente
-        document.getElementById('modal_fecha_pago').addEventListener('change', function() {
-            var fechaPago = this.value;
-            if (fechaPago) {
-                var fecha = new Date(fechaPago);
-                fecha.setMonth(fecha.getMonth() + 1);
-                var year = fecha.getFullYear();
-                var month = String(fecha.getMonth() + 1).padStart(2, '0');
-                var day = String(fecha.getDate()).padStart(2, '0');
-                document.getElementById('modal_fecha_vencimiento').value = year + '-' + month + '-' + day;
-            }
-        });
-    </script>
 </body>
 </html>

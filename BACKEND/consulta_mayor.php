@@ -1,8 +1,12 @@
 <?php
 // BACKEND/consulta_mayor.php
+require_once 'conecxion_bd.php';
 
-function obtenerLibroMayor($conexion) {
-    // Corregido a 'catalogo_cuentas' en el FROM para solucionar el mysqli_sql_exception
+function obtenerLibroMayor($conexion, $id_empresa = null) {
+    
+    // ============================================================
+    // CONSULTA BASE CON RELACIÓN A FACTURAS
+    // ============================================================
     $sql = "SELECT 
                 MAX(ad.fecha_asiento) as fecha_operacion,
                 cc.codigo_cuenta,
@@ -19,8 +23,18 @@ function obtenerLibroMayor($conexion) {
             FROM catalogo_cuentas cc
             INNER JOIN asiento_detalle det ON cc.id_cuenta = det.id_cuenta
             INNER JOIN asiento_diario ad ON det.id_asiento = ad.id_asiento
-            GROUP BY cc.id_cuenta, cc.codigo_cuenta, cc.nombre_cuenta
-            ORDER BY cc.codigo_cuenta ASC";
+            INNER JOIN facturas f ON ad.id_factura = f.id_factura";
+    
+    // ============================================================
+    // AGREGAR FILTRO POR EMPRESA (si se seleccionó una)
+    // ============================================================
+    if ($id_empresa !== null && $id_empresa !== '') {
+        $id_empresa = $conexion->real_escape_string($id_empresa);
+        $sql .= " WHERE f.id_empresa = '$id_empresa'";
+    }
+    
+    $sql .= " GROUP BY cc.id_cuenta, cc.codigo_cuenta, cc.nombre_cuenta
+              ORDER BY cc.codigo_cuenta ASC";
 
     $resultado = $conexion->query($sql);
 
