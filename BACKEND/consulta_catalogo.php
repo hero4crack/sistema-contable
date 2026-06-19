@@ -1,16 +1,37 @@
 <?php
-// Primero incluimos tu archivo de conexión (verifica que el nombre sea exacto)
-require_once 'conecxion_bd.php'; 
+// BACKEND/consulta_catalogo.php
+require_once 'conecxion_bd.php';
 
-function obtenerCatalogo($conexion) {
-    // Consulta para traer las cuentas ordenadas por código
-    $sql = "SELECT * FROM catalogo_cuentas ORDER BY codigo_cuenta ASC";
-    $resultado = $conexion->query($sql);
-
-    if (!$resultado) {
-        die("Error en la consulta: " . $conexion->error);
+// ============================================================
+// FUNCIÓN PARA OBTENER EL CATÁLOGO DE CUENTAS
+// ============================================================
+function obtenerCatalogo($conexion, $id_empresa = null) {
+    
+    // Consulta base
+    $sql = "SELECT 
+                id_cuenta,
+                codigo_cuenta,
+                nombre_cuenta,
+                tipo_cuenta,
+                nivel,
+                permite_movimiento
+            FROM catalogo_cuentas
+            WHERE 1=1";
+    
+    // Agregar filtro por empresa si se seleccionó una
+    if ($id_empresa !== null && $id_empresa !== '') {
+        $id_empresa = $conexion->real_escape_string($id_empresa);
+        $sql .= " AND id_empresa = '$id_empresa'";
     }
-
+    
+    $sql .= " ORDER BY codigo_cuenta ASC";
+    
+    $resultado = $conexion->query($sql);
+    
+    if (!$resultado) {
+        die("Error al obtener el catálogo: " . $conexion->error);
+    }
+    
     return $resultado;
 }
 ?>
