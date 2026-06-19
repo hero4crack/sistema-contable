@@ -13,16 +13,27 @@ while ($row = mysqli_fetch_assoc($result_empresas)) {
 }
 
 // ============================================
-// 2. CAPTURAR FILTROS (mes, año, empresa)
+// 2. OBTENER PROVEEDORES PARA EL SELECTOR
+// ============================================
+$query_proveedores = "SELECT id_proveedor, razon_social, rif FROM proveedores WHERE estado_activo = 1 ORDER BY razon_social ASC";
+$result_proveedores = mysqli_query($conexion, $query_proveedores);
+$proveedores = [];
+while ($row = mysqli_fetch_assoc($result_proveedores)) {
+    $proveedores[] = $row;
+}
+
+// ============================================
+// 3. CAPTURAR FILTROS (mes, año, empresa, proveedor)
 // ============================================
 $mes_actual = isset($_GET['mes']) ? $_GET['mes'] : date('m');
 $anio_actual = isset($_GET['anio']) ? $_GET['anio'] : date('Y');
 $id_empresa_filtro = isset($_GET['id_empresa']) ? $_GET['id_empresa'] : '';
+$id_proveedor_filtro = isset($_GET['id_proveedor']) ? $_GET['id_proveedor'] : '';
 
 // ============================================
-// 3. OBTENER FACTURAS FILTRADAS
+// 4. OBTENER FACTURAS FILTRADAS
 // ============================================
-$resultado_facturas = obtenerLibroFacturas($conexion, $mes_actual, $anio_actual, $id_empresa_filtro);
+$resultado_facturas = obtenerLibroFacturas($conexion, $mes_actual, $anio_actual, $id_empresa_filtro, $id_proveedor_filtro);
 
 // Separar ventas y compras
 $ventas = [];
@@ -99,6 +110,18 @@ $meses = [
             border-color: #764ba2;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
         }
+        .proveedor-selector {
+            background: white;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        .proveedor-selector:focus {
+            border-color: #d97706;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        }
         .table-wrapper {
             overflow-x: auto;
         }
@@ -109,6 +132,12 @@ $meses = [
             text-align: center;
             padding: 20px;
             color: #94a3b8;
+        }
+        .filtro-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -146,14 +175,14 @@ $meses = [
             <section class="content">
                 
                 <!-- ============================================ -->
-                <!-- SECCIÓN DE FILTROS CON EMPRESA              -->
+                <!-- SECCIÓN DE FILTROS                           -->
                 <!-- ============================================ -->
                 <div class="filter-box">
                     <form method="GET" action="libro_facturas.php" class="row align-items-end g-2">
                         
-                        <!-- Selector de Empresa -->
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;">
+                        <!-- Selector de Empresa (para VENTAS) -->
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold text-secondary text-uppercase filtro-label">
                                 <i class="fas fa-building me-1"></i> Empresa
                             </label>
                             <select name="id_empresa" class="form-select empresa-selector">
@@ -161,16 +190,32 @@ $meses = [
                                 <?php foreach ($empresas as $emp): ?>
                                     <option value="<?php echo $emp['id_empresa']; ?>" 
                                         <?php echo ($id_empresa_filtro == $emp['id_empresa']) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($emp['nombre_empresa']); ?> 
-                                        (<?php echo htmlspecialchars($emp['rif']); ?>)
+                                        <?php echo htmlspecialchars($emp['nombre_empresa']); ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
 
+                        <!-- Selector de Proveedor (para COMPRAS) -->
                         <div class="col-md-2">
-                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;">
-                                <i class="fas fa-calendar-alt me-1"></i> Mes Fiscal
+                            <label class="form-label fw-bold text-secondary text-uppercase filtro-label">
+                                <i class="fas fa-truck me-1"></i> Proveedor
+                            </label>
+                            <select name="id_proveedor" class="form-select proveedor-selector">
+                                <option value="">Todos los proveedores</option>
+                                <?php foreach ($proveedores as $prov): ?>
+                                    <option value="<?php echo $prov['id_proveedor']; ?>" 
+                                        <?php echo ($id_proveedor_filtro == $prov['id_proveedor']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($prov['razon_social']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <!-- Mes -->
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold text-secondary text-uppercase filtro-label">
+                                <i class="fas fa-calendar-alt me-1"></i> Mes
                             </label>
                             <select name="mes" class="form-select border-secondary-subtle">
                                 <?php foreach ($meses as $num => $nombre): ?>
@@ -180,8 +225,10 @@ $meses = [
                                 <?php endforeach; ?>
                             </select>
                         </div>
+
+                        <!-- Año -->
                         <div class="col-md-2">
-                            <label class="form-label fw-bold text-secondary text-uppercase" style="font-size: 0.8rem;">
+                            <label class="form-label fw-bold text-secondary text-uppercase filtro-label">
                                 <i class="fas fa-clock me-1"></i> Año
                             </label>
                             <select name="anio" class="form-select border-secondary-subtle">
@@ -196,11 +243,15 @@ $meses = [
                                 <?php endfor; ?>
                             </select>
                         </div>
+
+                        <!-- Botón Filtrar -->
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-dark w-100 fw-bold">
                                 <i class="fas fa-filter me-1"></i> Filtrar
                             </button>
                         </div>
+
+                        <!-- Información del período -->
                         <div class="col text-end">
                             <span class="badge bg-secondary p-2 fs-6 text-uppercase fw-semibold">
                                 <i class="fas fa-calendar-check me-1"></i>
@@ -216,14 +267,26 @@ $meses = [
                                     }
                                     ?>
                                     <span class="ms-2 text-warning">| <i class="fas fa-building"></i> <?php echo htmlspecialchars($nombre_emp); ?></span>
-                                <?php else: ?>
-                                    <span class="ms-2 text-info">| <i class="fas fa-globe"></i> Todas</span>
+                                <?php endif; ?>
+                                <?php if ($id_proveedor_filtro): ?>
+                                    <?php 
+                                    $nombre_prov = '';
+                                    foreach ($proveedores as $prov) {
+                                        if ($prov['id_proveedor'] == $id_proveedor_filtro) {
+                                            $nombre_prov = $prov['razon_social'];
+                                            break;
+                                        }
+                                    }
+                                    ?>
+                                    <span class="ms-2 text-info">| <i class="fas fa-truck"></i> <?php echo htmlspecialchars($nombre_prov); ?></span>
                                 <?php endif; ?>
                             </span>
                         </div>
+
                     </form>
                 </div>
 
+                <!-- Botones de pestañas -->
                 <div class="d-flex justify-content-between align-items-end px-2">
                     <div>
                         <button id="btnTabVentas" class="tab-btn active-tab" onclick="cambiarLibro('VENTAS')">
@@ -373,8 +436,8 @@ $meses = [
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="9" class="sin-datos">
-                                            <?php if ($id_empresa_filtro): ?>
-                                                No hay operaciones de compras para esta empresa en el período seleccionado.
+                                            <?php if ($id_proveedor_filtro): ?>
+                                                No hay operaciones de compras para este proveedor en el período seleccionado.
                                             <?php else: ?>
                                                 No hay operaciones de compras en este período.
                                             <?php endif; ?>
@@ -436,7 +499,6 @@ $meses = [
                                 <select name="id_empresa" id="id_empresa" class="form-select border-success">
                                     <option value="">Seleccione...</option>
                                     <?php
-                                    // Consulta directa (corregida)
                                     $empresas_modal = mysqli_query($conexion, "SELECT id_empresa, nombre_empresa FROM empresas_clientes WHERE estado_activo = '1' ORDER BY nombre_empresa ASC");
                                     while ($emp = $empresas_modal->fetch_assoc()):
                                     ?>
