@@ -165,6 +165,25 @@ foreach ($empresas_pago as $emp) {
             color: white;
         }
 
+        .btn-quick.pago {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .btn-quick.pago i {
+            color: #10b981;
+        }
+
+        .btn-quick.pago:hover {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+
+        .btn-quick.pago:hover i {
+            color: white;
+        }
+
         .grid-actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -325,12 +344,28 @@ foreach ($empresas_pago as $emp) {
             background: #cbd5e1;
             border-radius: 10px;
         }
+
+        .btn-ver-pagos {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .btn-ver-pagos:hover {
+            background: #059669;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
         
-        <!-- Sidebar (igual que antes) -->
+        <!-- Sidebar -->
         <aside class="main-sidebar">
             <div class="brand"><img src="../IMG/logo_empresa-sinfondo.png" alt="#" class="mi-imagen"></div>
             <nav class="menu">
@@ -370,7 +405,12 @@ foreach ($empresas_pago as $emp) {
                 <!-- PANEL DE ESTADO DE PAGOS                     -->
                 <!-- ============================================ -->
                 <div class="pagos-card">
-                    <h4><i class="fas fa-hand-holding-usd"></i> Estado de Pagos - Servicios Contables</h4>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4><i class="fas fa-hand-holding-usd"></i> Estado de Pagos - Servicios Contables</h4>
+                        <a href="../VIEWS/pagos_servicio.php" class="btn-ver-pagos">
+                            <i class="fas fa-arrow-right me-1"></i> Ver todos
+                        </a>
+                    </div>
                     
                     <!-- Estadísticas rápidas -->
                     <div class="row mb-4">
@@ -397,8 +437,12 @@ foreach ($empresas_pago as $emp) {
                     <!-- Lista de empresas -->
                     <div class="scroll-pagos">
                         <?php if (!empty($empresas_pago)): ?>
-                            <?php foreach ($empresas_pago as $emp): ?>
-                                <?php
+                            <?php 
+                            // Mostrar solo las primeras 5 empresas en el dashboard
+                            $contador = 0;
+                            foreach ($empresas_pago as $emp): 
+                                if ($contador >= 5) break;
+                                $contador++;
                                 $estado = $emp['estado_pago'];
                                 $clase_estado = '';
                                 $texto_estado = '';
@@ -417,7 +461,7 @@ foreach ($empresas_pago as $emp) {
                                     $texto_estado = '⏳ Pendiente';
                                     $color_borde = '#f59e0b';
                                 }
-                                ?>
+                            ?>
                                 <div class="empresa-pago-item" style="border-left-color: <?php echo $color_borde; ?>;">
                                     <div>
                                         <span class="nombre"><?php echo htmlspecialchars($emp['nombre_empresa']); ?></span>
@@ -435,6 +479,13 @@ foreach ($empresas_pago as $emp) {
                                     </div>
                                 </div>
                             <?php endforeach; ?>
+                            <?php if ($total_empresas > 5): ?>
+                                <div class="text-center mt-2">
+                                    <small class="text-muted">Mostrando 5 de <?php echo $total_empresas; ?> empresas. 
+                                        <a href="../VIEWS/pagos_servicio.php" class="text-success">Ver todas</a>
+                                    </small>
+                                </div>
+                            <?php endif; ?>
                         <?php else: ?>
                             <div class="text-center text-muted py-3">
                                 <i class="fas fa-inbox fa-2x d-block mb-2" style="color: #cbd5e1;"></i>
@@ -464,6 +515,9 @@ foreach ($empresas_pago as $emp) {
                         </a>
                         <a href="../VIEWS/empleados.php" class="btn-quick">
                             <i class="fas fa-users"></i> Empleados
+                        </a>
+                        <a href="../VIEWS/pagos_servicio.php" class="btn-quick pago">
+                            <i class="fas fa-hand-holding-usd"></i> Pagos Servicio
                         </a>
                         <a href="../VIEWS/catalogo_cuenta.php" class="btn-quick primary">
                             <i class="fas fa-list-ol"></i> Catálogo Cuentas
